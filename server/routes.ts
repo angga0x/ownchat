@@ -266,6 +266,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
     
+    // Handle typing indicator
+    socket.on("typing", async (data) => {
+      try {
+        if (!userId) {
+          socket.emit("error", { message: "Not authenticated" });
+          return;
+        }
+        
+        const { receiverId } = data;
+        
+        // Get receiver's socket
+        const receiverSocketId = userSockets.get(receiverId);
+        if (receiverSocketId) {
+          const receiverSocket = io.sockets.sockets.get(receiverSocketId);
+          if (receiverSocket) {
+            // Notify the receiver that the user is typing
+            receiverSocket.emit("user_typing", { 
+              userId,
+              senderUsername: socket.data.username 
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Typing indicator error:", error);
+      }
+    });
+    
     // Handle marking messages as read
     socket.on("mark_read", async (data) => {
       try {

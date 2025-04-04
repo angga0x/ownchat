@@ -4,10 +4,11 @@ import { useAuth } from "@/hooks/use-auth";
 import { User } from "@shared/schema";
 import UserList from "@/components/chat/user-list";
 import ChatRoom from "@/components/chat/chat-room";
-import { ArrowLeft, LogOut, Menu, Users } from "lucide-react";
+import { ArrowLeft, LogOut, Users, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { ThemeToggle, ThemeManager } from "@/components/ui/theme-toggle";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
@@ -110,10 +111,19 @@ export default function HomePage() {
         {(!isMobile || (isMobile && !selectedUser)) && (
           <div className="flex items-center space-x-3">
             <div className="flex items-center">
-              <span className="bg-green-500 rounded-full h-2 w-2 mr-2"></span>
-              <span className="text-sm font-medium text-muted-foreground hidden sm:inline">
-                @{user?.username}
-              </span>
+              <Avatar className="h-8 w-8 border border-border">
+                <AvatarFallback className="bg-primary/10 text-primary">
+                  {getInitials(user?.username || '')}
+                </AvatarFallback>
+              </Avatar>
+              <div className="ml-2 hidden sm:block">
+                <p className="text-sm font-medium text-foreground">@{user?.username}</p>
+                <div className="flex items-center">
+                  <span className="bg-green-500 rounded-full h-2 w-2 mr-1.5"></span>
+                  <span className="text-xs text-muted-foreground">Online</span>
+                </div>
+              </div>
+              <span className="ml-2 bg-green-500 rounded-full h-2 w-2 sm:hidden"></span>
             </div>
             <ThemeToggle />
             <Button variant="ghost" size="icon" onClick={handleLogout} disabled={logoutMutation.isPending}>
@@ -123,8 +133,18 @@ export default function HomePage() {
         )}
         {isMobile && selectedUser && !showUserList && (
           <div className="flex items-center space-x-3">
-            <h2 className="font-medium text-foreground">@{selectedUser.username}</h2>
-            <span className={`ml-2 ${selectedUser.online ? "bg-green-500" : "bg-muted"} h-2 w-2 rounded-full`}></span>
+            <Avatar className="h-8 w-8 border border-border">
+              <AvatarFallback className="bg-primary/10 text-primary">
+                {getInitials(selectedUser.username)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="ml-1">
+              <p className="text-sm font-medium text-foreground">@{selectedUser.username}</p>
+              <div className="flex items-center">
+                <span className={`${selectedUser.online ? "bg-green-500" : "bg-muted"} rounded-full h-2 w-2 mr-1.5`}></span>
+                <span className="text-xs text-muted-foreground">{selectedUser.online ? 'Online' : 'Offline'}</span>
+              </div>
+            </div>
             <ThemeToggle />
           </div>
         )}

@@ -5,9 +5,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import ChatBubble from "./chat-bubble";
 import MessageInput from "./message-input";
 import { format } from "date-fns";
-import { Loader2 } from "lucide-react";
+import { Loader2, MessageCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { markMessagesAsRead } from "@/lib/socket";
+import { markMessagesAsRead, isUserTyping } from "@/lib/socket";
 
 interface ChatRoomProps {
   selectedUser: User | null;
@@ -156,6 +156,17 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
                 </div>
               </div>
             ))}
+            {/* Typing indicator */}
+            {selectedUser && isUserTyping(selectedUser.id) && (
+              <div className="flex items-center space-x-2 mt-2 ml-4 mb-1 animate-pulse transition-opacity">
+                <div className="flex">
+                  <span className="w-2 h-2 bg-muted-foreground/70 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                  <span className="w-2 h-2 mx-1 bg-muted-foreground/70 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                  <span className="w-2 h-2 bg-muted-foreground/70 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                </div>
+                <span className="text-xs text-muted-foreground">@{selectedUser.username} is typing...</span>
+              </div>
+            )}
             <div ref={messagesEndRef} className="h-4" />
           </>
         )}

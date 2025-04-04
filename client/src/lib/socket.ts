@@ -3,6 +3,18 @@ import { io, Socket } from "socket.io-client";
 
 let socket: Socket | null = null;
 
+// Debounce function to control event frequency
+export function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  
+  return (...args: Parameters<F>): void => {
+    if (timeout !== null) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(() => func(...args), waitFor);
+  };
+}
+
 export function setupSocket(token: string) {
   // Close existing socket if any
   if (socket) {
@@ -24,6 +36,17 @@ export function setupSocket(token: string) {
     
     // Authenticate the connection with JWT
     socket?.emit("auth", { token });
+  });
+  
+  socket.on("user_typing", (data) => {
+    console.log("User typing:", data);
+    updateUserTypingStatus(data.userId, true);
+    
+    // Automatically reset the typing status after 3 seconds
+    // This ensures the indicator disappears if the user stops typing
+    setTimeout(() => {
+      updateUserTypingStatus(data.userId, false);
+    }, 3000);
   });
   
   // Set up event handlers
@@ -87,6 +110,8 @@ export function setupSocket(token: string) {
   socket.on("reconnect_error", (error) => {
     console.error("Socket.IO reconnection error:", error);
   });
+  
+
   
   return socket;
 }
@@ -207,4 +232,58 @@ export function markMessagesAsRead(senderId: number) {
   }
   
   socket.emit("mark_read", { senderId });
+}
+
+// Function to manage typing indicators
+let typingTimeouts: Record<number, NodeJS.Timeout> = {};
+let typingState: Record<number, boolean> = {};
+
+// Update UI to show typing indicators
+function updateUserTypingStatus(userId: number, isTyping: boolean) {
+  // Use a query key specific to typing status
+  const typingKey = ['typing-status'];
+  
+  // Get the current typing status map or initialize it
+  const currentTypingStatus = queryClient.getQueryData<Record<number, boolean>>(typingKey) || {};
+  
+  // Update the status only if it changed
+  if (currentTypingStatus[userId] !== isTyping) {
+    queryClient.setQueryData(typingKey, {
+      ...currentTypingStatus,
+      [userId]: isTyping
+    });
+  }
+}
+
+// Function to notify when a user starts typing
+export function sendTypingStatus(receiverId: number) {
+  if (!socket || !socket.connected) {
+    return;
+  }
+  
+  // Don't emit event if we already sent one recently for this receiver
+  if (typingState[receiverId]) {
+    // Refresh the timeout
+    clearTimeout(typingTimeouts[receiverId]);
+    typingTimeouts[receiverId] = setTimeout(() => {
+      typingState[receiverId] = false;
+    }, 2000); // Stop typing indicator after 2 seconds of inactivity
+    return;
+  }
+  
+  // Otherwise, send the typing indicator and set the state
+  socket.emit("typing", { receiverId });
+  typingState[receiverId] = true;
+  
+  // Set timeout to reset the typing state after 2 seconds
+  typingTimeouts[receiverId] = setTimeout(() => {
+    typingState[receiverId] = false;
+  }, 2000);
+}
+
+// Function to check if a user is currently typing
+export function isUserTyping(userId: number): boolean {
+  const typingKey = ['typing-status'];
+  const typingStatus = queryClient.getQueryData<Record<number, boolean>>(typingKey) || {};
+  return typingStatus[userId] || false;
 }

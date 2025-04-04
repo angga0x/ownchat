@@ -3,7 +3,7 @@ import { User } from "@shared/schema";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { sendMessage, getSocket } from "@/lib/socket";
+import { sendMessage, getSocket, sendTypingStatus, debounce } from "@/lib/socket";
 import { Image, Loader2, Send, X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
@@ -51,9 +51,25 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
     textarea.style.height = `${newHeight}px`;
   }, [messageText]);
   
+  // Create debounced typing notification (only send typing status every 500ms)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedTypingNotification = useRef(
+    debounce(() => {
+      if (selectedUser && selectedUser.id) {
+        sendTypingStatus(selectedUser.id);
+      }
+    }, 500)
+  ).current;
+  
   // Handle text input change
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessageText(e.target.value);
+    const value = e.target.value;
+    setMessageText(value);
+    
+    // Only send typing notification if there's text
+    if (value.trim()) {
+      debouncedTypingNotification();
+    }
   };
   
   // Handle image upload
