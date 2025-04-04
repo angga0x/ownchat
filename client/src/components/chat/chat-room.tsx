@@ -87,7 +87,7 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
     <div className="h-full flex flex-col bg-background theme-transition">
       {/* Chat Header - Hidden on Mobile as we show it in the main header instead */}
       {!isMobile && (
-        <div className="bg-background border-b border-border p-3 flex items-center space-x-3 shadow-sm">
+        <div className="bg-background border-b border-border p-3 sm:p-4 flex items-center space-x-3 shadow-sm">
           <div className="relative">
             <div className={`w-10 h-10 ${getUserColor(selectedUser.username)} rounded-full flex items-center justify-center text-white font-medium shadow-sm`}>
               <span>{getInitials(selectedUser.username)}</span>
@@ -96,15 +96,25 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
           </div>
           <div className="flex-1">
             <h2 className="font-medium text-foreground">@{selectedUser.username}</h2>
-            <p className={`text-xs ${selectedUser.online ? "text-green-600" : "text-muted-foreground"}`}>
-              {selectedUser.online ? "Online" : "Offline"}
-            </p>
+            <div className="text-xs flex items-center">
+              {selectedUser.online ? (
+                <>
+                  <span className="inline-block h-2 w-2 rounded-full bg-green-500 mr-1.5"></span>
+                  <span className="text-green-600">Online</span>
+                  {isUserTyping(selectedUser.id) && (
+                    <span className="ml-2 text-muted-foreground">(sedang mengetik...)</span>
+                  )}
+                </>
+              ) : (
+                <span className="text-muted-foreground">Offline</span>
+              )}
+            </div>
           </div>
         </div>
       )}
       
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-3 md:p-4" ref={scrollAreaRef}>
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:pr-8" ref={scrollAreaRef}>
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="animate-spin h-6 w-6 text-primary" />

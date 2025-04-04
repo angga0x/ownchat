@@ -4,12 +4,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { sendMessage, getSocket, sendTypingStatus, debounce } from "@/lib/socket";
-import { Image, Loader2, Send, X } from "lucide-react";
+import { Image, Loader2, Send, X, Smile } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/use-auth";
 import { addMessageToCache } from "@/lib/chatCache";
+import EmojiPicker, { EmojiClickData, Theme } from "emoji-picker-react";
 
 interface MessageInputProps {
   selectedUser: User;
@@ -20,8 +21,10 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
@@ -31,7 +34,39 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
     setMessageText("");
     setImageFile(null);
     setImagePreviewUrl(null);
+    setShowEmojiPicker(false);
   }, [selectedUser]);
+  
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+  
+  // Handle emoji selection
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    const emoji = emojiData.emoji;
+    const cursorPosition = textareaRef.current?.selectionStart || messageText.length;
+    const updatedText = messageText.slice(0, cursorPosition) + emoji + messageText.slice(cursorPosition);
+    setMessageText(updatedText);
+    
+    // Focus back on the textarea after selecting an emoji
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.selectionStart = cursorPosition + emoji.length;
+        textareaRef.current.selectionEnd = cursorPosition + emoji.length;
+      }
+    }, 10);
+  };
   
   // Auto-focus textarea when component mounts
   useEffect(() => {
@@ -299,14 +334,32 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
               style={{ height: '40px' }}
             />
             
-            {/* Emoji button placeholder - for visual authenticity */}
+            {/* Emoji Button */}
             <div className="absolute right-3 bottom-2">
-              <div className="text-messenger-blue cursor-pointer">
-                <svg viewBox="0 0 16 16" height="20" width="20" className="fill-current">
-                  <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16zM7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zM8.45 4h-.9a.45.45 0 0 0-.45.45v.9c0 .248.203.45.45.45h.9a.45.45 0 0 0 .45-.45v-.9a.45.45 0 0 0-.45-.45zm2.5 1c-.552 0-1 .672-1 1.5S10.448 8 11 8s1-.672 1-1.5S11.552 5 11 5zM7.243 9.857a.5.5 0 0 0-.742.146.5.5 0 0 0 .72.678c.49-.521 1.335-.851 2.28-.848.942.005 1.792.356 2.29.91a.5.5 0 0 0 .737-.166.5.5 0 0 0-.171-.707c-.687-.443-1.635-.845-2.86-.852-1.131-.008-2.177.355-2.854.839z" />
-                </svg>
+              <div 
+                className="text-messenger-blue cursor-pointer"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              >
+                <Smile className="h-5 w-5" />
               </div>
             </div>
+            
+            {/* Emoji Picker */}
+            {showEmojiPicker && (
+              <div 
+                className="absolute bottom-full right-0 mb-2 z-50" 
+                ref={emojiPickerRef}
+              >
+                <EmojiPicker
+                  onEmojiClick={handleEmojiClick}
+                  theme={Theme.AUTO}
+                  width={320}
+                  height={400}
+                  previewConfig={{ showPreview: false }}
+                  searchPlaceHolder="Cari emoji..."
+                />
+              </div>
+            )}
           </div>
           
           {/* Image Preview - Updated for Messenger Style */}
