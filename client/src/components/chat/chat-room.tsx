@@ -84,10 +84,10 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
   }
   
   return (
-    <div className="h-full flex flex-col bg-[#1e1e1e] dark:bg-[#1e1e1e] theme-transition messenger-chat-area">
+    <div className="h-full flex flex-col bg-white dark:bg-[#1e1e1e] theme-transition messenger-chat-area">
       {/* Chat Header - Facebook Messenger Style */}
       {!isMobile && (
-        <div className="bg-[#1e1e1e] dark:bg-[#1e1e1e] border-b border-zinc-800 p-4 flex items-center shadow-sm messenger-header">
+        <div className="bg-white dark:bg-[#1e1e1e] border-b border-gray-200 dark:border-zinc-800 p-4 flex items-center shadow-sm messenger-header">
           <div className="w-full flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="relative">

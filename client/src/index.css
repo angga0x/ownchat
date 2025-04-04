@@ -23,6 +23,31 @@
     --dark-card: #2c2c2c;
     --dark-bubble: #2c2c2c;
     --dark-hover: #3a3a3a;
+    --light-bg: #ffffff;
+    --light-card: #f5f5f5;
+    --light-bubble: #e4e6eb;
+    --light-hover: #eaeaea;
+
+    /* Light mode default */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 12%;
+    --card: 0 0% 96%;
+    --card-foreground: 0 0% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 12%;
+    --primary: 51 95% 53%;
+    --primary-foreground: 0 0% 12%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 12%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 12%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 51 95% 53%;
   }
 
   .dark {
@@ -176,17 +201,33 @@
   
   /* Messenger UI Elements */
   .messenger-header {
-    @apply flex items-center justify-between h-16 px-4 border-b dark:border-zinc-800;
+    @apply flex items-center justify-between h-16 px-4 border-b;
+    background-color: var(--light-bg);
+    border-color: #e4e6eb;
+  }
+  
+  .dark .messenger-header {
     background-color: var(--dark-bg);
+    border-color: var(--border);
   }
   
   .messenger-sidebar {
-    @apply w-full h-full bg-card border-r dark:border-zinc-800;
+    @apply w-full h-full border-r;
+    background-color: var(--light-card);
+    border-color: #e4e6eb;
+  }
+  
+  .dark .messenger-sidebar {
     background-color: var(--dark-card);
+    border-color: var(--border);
   }
   
   .messenger-chat-area {
     @apply flex flex-col h-full;
+    background-color: var(--light-bg);
+  }
+  
+  .dark .messenger-chat-area {
     background-color: var(--dark-bg);
   }
   
@@ -195,17 +236,31 @@
   }
   
   .messenger-user-item:hover {
+    background-color: var(--light-hover);
+  }
+  
+  .dark .messenger-user-item:hover {
     background-color: var(--dark-hover);
   }
   
   .messenger-user-item.active {
+    background-color: var(--light-hover);
+  }
+  
+  .dark .messenger-user-item.active {
     background-color: var(--dark-hover);
   }
   
   /* Improved message input for Messenger style */
   .messenger-input-container {
-    @apply flex items-center gap-2 p-3 border-t dark:border-zinc-800;
+    @apply flex items-center gap-2 p-3 border-t;
+    background-color: var(--light-card);
+    border-color: #e4e6eb;
+  }
+  
+  .dark .messenger-input-container {
     background-color: var(--dark-card);
+    border-color: var(--border);
   }
   
   .messenger-input {

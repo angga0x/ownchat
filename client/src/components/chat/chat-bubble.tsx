@@ -76,33 +76,33 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
   const MessageActions = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity rounded-full bg-zinc-800/50 hover:bg-zinc-700">
-          <MoreVertical className="h-4 w-4 text-zinc-300" />
+        <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity rounded-full bg-gray-200/70 dark:bg-zinc-800/50 hover:bg-gray-300 dark:hover:bg-zinc-700">
+          <MoreVertical className="h-4 w-4 text-gray-500 dark:text-zinc-300" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={isCurrentUser ? "end" : "start"} className="bg-zinc-800 border-zinc-700">
-        <DropdownMenuItem onClick={handleDeleteForMe} className="text-zinc-200 focus:text-white focus:bg-zinc-700">
+      <DropdownMenuContent align={isCurrentUser ? "end" : "start"} className="bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700">
+        <DropdownMenuItem onClick={handleDeleteForMe} className="text-gray-700 dark:text-zinc-200 focus:text-gray-900 dark:focus:text-white focus:bg-gray-100 dark:focus:bg-zinc-700">
           <Trash className="h-4 w-4 mr-2" />
           Delete for me
         </DropdownMenuItem>
         {isCurrentUser && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-zinc-200 focus:text-white focus:bg-zinc-700">
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-gray-700 dark:text-zinc-200 focus:text-gray-900 dark:focus:text-white focus:bg-gray-100 dark:focus:bg-zinc-700">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete for everyone
               </DropdownMenuItem>
             </AlertDialogTrigger>
-            <AlertDialogContent className="bg-zinc-800 border-zinc-700 text-white">
+            <AlertDialogContent className="bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white">
               <AlertDialogHeader>
-                <AlertDialogTitle className="text-white">Delete message for everyone?</AlertDialogTitle>
-                <AlertDialogDescription className="text-zinc-300">
+                <AlertDialogTitle className="text-gray-900 dark:text-white">Delete message for everyone?</AlertDialogTitle>
+                <AlertDialogDescription className="text-gray-500 dark:text-zinc-300">
                   This message will be permanently deleted for all conversation participants.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="bg-zinc-700 text-white hover:bg-zinc-600">Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteForAll} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+                <AlertDialogCancel className="bg-gray-100 dark:bg-zinc-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-zinc-600">Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteForAll} className="bg-red-600 hover:bg-red-700 text-white">Delete</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -123,7 +123,7 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
               : "messenger-bubble-received rounded-t-[20px] rounded-br-[20px] rounded-bl-[4px]"
             }`}>
             <p className={`text-sm md:text-[15px] break-words whitespace-pre-wrap 
-              ${isCurrentUser ? "text-black" : "text-white"}`}>{message.content}</p>
+              ${isCurrentUser ? "text-black" : "text-black dark:text-white"}`}>{message.content}</p>
           </div>
           <div className="flex items-center px-1 space-x-1">
             <span className="text-[10px] text-zinc-500 leading-none">{formattedTime}</span>
@@ -173,7 +173,7 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
             </div>
             
             {message.content && (
-              <div className={`p-2 ${isCurrentUser ? "text-black" : "text-white"}`}>
+              <div className={`p-2 ${isCurrentUser ? "text-black" : "text-black dark:text-white"}`}>
                 <p className="text-sm md:text-[15px] break-words whitespace-pre-wrap">{message.content}</p>
               </div>
             )}

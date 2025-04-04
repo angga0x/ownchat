@@ -300,7 +300,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
   };
   
   return (
-    <div className="bg-[#1e1e1e] dark:bg-[#1e1e1e] border-t border-zinc-800 p-3 sm:p-4 theme-transition messenger-input-container">
+    <div className="bg-white dark:bg-[#1e1e1e] border-t border-gray-200 dark:border-zinc-800 p-3 sm:p-4 theme-transition messenger-input-container">
       <div className="flex items-center space-x-2 w-full">
         {/* Image Upload - Facebook Messenger Style */}
         <div className="relative flex-shrink-0">
@@ -326,12 +326,12 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
         
         {/* Text Input - Facebook Messenger Style */}
         <div className="w-full max-w-[calc(100%-5.5rem)] relative messenger-input">
-          <div className="relative rounded-full overflow-hidden bg-zinc-800 dark:bg-zinc-800 border-0 focus-within:ring-1 focus-within:ring-messenger-yellow">
+          <div className="relative rounded-full overflow-hidden bg-gray-100 dark:bg-zinc-800 border-0 focus-within:ring-1 focus-within:ring-messenger-yellow">
             <Textarea 
               ref={textareaRef}
               id="message-input"
               rows={1}
-              className="block w-full resize-none border-0 bg-transparent py-[10px] pl-4 pr-12 focus:outline-none min-h-[40px] max-h-[120px] text-base shadow-none text-white" 
+              className="block w-full resize-none border-0 bg-transparent py-[10px] pl-4 pr-12 focus:outline-none min-h-[40px] max-h-[120px] text-base shadow-none text-gray-800 dark:text-white" 
               placeholder="Aa"
               value={messageText}
               onChange={handleTextChange}

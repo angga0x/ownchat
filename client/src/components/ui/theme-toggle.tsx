@@ -40,12 +40,16 @@ export function ThemeToggle() {
       variant="ghost" 
       size="icon" 
       onClick={toggleTheme}
-      className="rounded-full w-9 h-9 bg-zinc-800/50 hover:bg-zinc-700 text-zinc-400"
+      className={`rounded-full w-9 h-9 transition-colors ${
+        theme === "dark" 
+          ? "bg-zinc-800 hover:bg-zinc-700 text-zinc-400" 
+          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+      }`}
     >
       {theme === "dark" ? (
         <Sun className="h-5 w-5 text-messenger-yellow" />
       ) : (
-        <Moon className="h-5 w-5" />
+        <Moon className="h-5 w-5 text-gray-700" />
       )}
       <span className="sr-only">Toggle theme</span>
     </Button>
