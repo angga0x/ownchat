@@ -301,7 +301,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
   
   return (
     <div className="bg-[#1e1e1e] dark:bg-[#1e1e1e] border-t border-zinc-800 p-3 sm:p-4 theme-transition messenger-input-container">
-      <div className="flex items-center space-x-2 max-w-4xl mx-auto">
+      <div className="flex items-center space-x-2 w-full">
         {/* Image Upload - Facebook Messenger Style */}
         <div className="relative flex-shrink-0">
           <input 
@@ -325,7 +325,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
         </div>
         
         {/* Text Input - Facebook Messenger Style */}
-        <div className="w-full max-w-[calc(100%-5.5rem)] md:max-w-[calc(100%-6rem)] lg:max-w-[calc(80%-6rem)] mx-auto relative messenger-input">
+        <div className="w-full max-w-[calc(100%-5.5rem)] relative messenger-input">
           <div className="relative rounded-full overflow-hidden bg-zinc-800 dark:bg-zinc-800 border-0 focus-within:ring-1 focus-within:ring-messenger-yellow">
             <Textarea 
               ref={textareaRef}

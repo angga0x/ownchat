@@ -116,7 +116,7 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
     return (
       <div className={`flex items-end group ${isCurrentUser ? "justify-end" : "justify-start"} mb-[3px] bubble-appear`}>
         {!isCurrentUser && <MessageActions />}
-        <div className={`flex flex-col space-y-[2px] ${isCurrentUser ? "items-end" : "items-start"} max-w-[70%] sm:max-w-[65%] md:max-w-md`}>
+        <div className={`flex flex-col space-y-[2px] ${isCurrentUser ? "items-end" : "items-start"} max-w-[70%] sm:max-w-[60%] md:max-w-[50%] lg:max-w-[40%]`}>
           <div className={`px-3 py-[6px] relative
             ${isCurrentUser 
               ? "messenger-bubble-sent rounded-t-[20px] rounded-bl-[20px] rounded-br-[4px]" 
@@ -140,7 +140,7 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
     return (
       <div className={`flex items-end group ${isCurrentUser ? "justify-end" : "justify-start"} mb-[3px] bubble-appear`}>
         {!isCurrentUser && <MessageActions />}
-        <div className={`flex flex-col space-y-[2px] ${isCurrentUser ? "items-end" : "items-start"} max-w-[70%] sm:max-w-[65%] md:max-w-md`}>
+        <div className={`flex flex-col space-y-[2px] ${isCurrentUser ? "items-end" : "items-start"} max-w-[70%] sm:max-w-[60%] md:max-w-[50%] lg:max-w-[40%]`}>
           <div className={`overflow-hidden
             ${isCurrentUser 
               ? "messenger-bubble-sent rounded-t-[20px] rounded-bl-[20px] rounded-br-[4px]" 

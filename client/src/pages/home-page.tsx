@@ -165,7 +165,7 @@ export default function HomePage() {
         {/* User List */}
         <div className={`${isMobile ? 'absolute inset-0 z-20 transition-transform duration-300 transform' : 'relative'} 
           ${(isMobile && !showUserList) ? '-translate-x-full' : 'translate-x-0'} 
-          ${!isMobile ? 'w-full md:w-80 flex-shrink-0' : 'w-full'}`}>
+          ${!isMobile ? 'w-full md:w-80 lg:w-96 flex-shrink-0 border-r border-zinc-800' : 'w-full'}`}>
           <UserList 
             users={filteredUsers} 
             isLoading={isLoadingUsers}
@@ -178,7 +178,7 @@ export default function HomePage() {
         {/* Chat Area */}
         <div className={`${isMobile ? 'absolute inset-0 z-10 transition-transform duration-300 transform' : 'relative'} 
           ${(isMobile && showUserList) ? 'translate-x-full' : 'translate-x-0'} 
-          ${!isMobile ? 'flex-1' : 'w-full'}`}>
+          ${!isMobile ? 'flex-1 mx-auto w-full max-w-screen-xl' : 'w-full'}`}>
           <ChatRoom 
             selectedUser={selectedUser}
             currentUser={user}

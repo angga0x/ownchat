@@ -87,8 +87,8 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
     <div className="h-full flex flex-col bg-[#1e1e1e] dark:bg-[#1e1e1e] theme-transition messenger-chat-area">
       {/* Chat Header - Facebook Messenger Style */}
       {!isMobile && (
-        <div className="bg-[#1e1e1e] dark:bg-[#1e1e1e] border-b border-zinc-800 p-4 flex items-center justify-between shadow-sm messenger-header">
-          <div className="max-w-4xl w-full mx-auto flex items-center justify-between">
+        <div className="bg-[#1e1e1e] dark:bg-[#1e1e1e] border-b border-zinc-800 p-4 flex items-center shadow-sm messenger-header">
+          <div className="w-full flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="relative">
                 <div className={`w-10 h-10 ${getUserColor(selectedUser.username)} rounded-full flex items-center justify-center text-white font-medium shadow-sm`}>
@@ -136,7 +136,7 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
       )}
       
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 md:px-8 lg:max-w-4xl lg:mx-auto" ref={scrollAreaRef}>
+      <div className="flex-1 overflow-y-auto p-4 md:px-6" ref={scrollAreaRef}>
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="animate-spin h-6 w-6 text-messenger-yellow" />
