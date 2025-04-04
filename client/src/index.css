@@ -9,5 +9,70 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+  }
+}
+
+@layer components {
+  /* Custom scrollbar styles */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+  
+  /* Telegram-like fast transitions */
+  .transition-fast {
+    transition-duration: 150ms;
+  }
+  
+  /* Bubble effects */
+  .bubble-appear {
+    animation: bubble-appear 0.3s ease forwards;
+  }
+  
+  @keyframes bubble-appear {
+    0% {
+      opacity: 0;
+      transform: translateY(10px) scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  /* Ensure touch interactions feel snappy */
+  @media (hover: none) {
+    .active\:bg-neutral-medium:active {
+      background-color: #f1f5f9;
+    }
+  }
+  
+  /* Improve text rendering */
+  p, h1, h2, h3, h4, h5, h6, span {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Optimize for mobile */
+  @media (max-width: 640px) {
+    input, textarea, button {
+      font-size: 16px !important; /* Prevents iOS zoom on focus */
+    }
   }
 }
