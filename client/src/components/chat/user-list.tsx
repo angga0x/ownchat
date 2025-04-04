@@ -91,7 +91,7 @@ export default function UserList({
             id="user-search"
             type="text"
             placeholder="Search in Messenger"
-            className="pl-10 py-2 h-10 bg-gray-100 dark:bg-zinc-800 border-0 text-gray-700 dark:text-zinc-200 rounded-full focus-visible:ring-1 focus-visible:ring-messenger-yellow"
+            className="pl-10 py-2 h-10 bg-gray-100 dark:bg-zinc-800 border-0 text-gray-700 dark:text-zinc-200 rounded-full focus-visible:ring-1 focus-visible:ring-messenger-blue"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -148,7 +148,7 @@ export default function UserList({
                 </div>
                 <div className="flex-shrink-0 flex flex-col items-end">
                   <div className="text-xs text-gray-500 dark:text-zinc-500">2m</div>
-                  {/* <div className="h-5 w-5 rounded-full bg-messenger-yellow flex items-center justify-center text-[10px] font-bold mt-1">
+                  {/* <div className="h-5 w-5 rounded-full bg-messenger-blue flex items-center justify-center text-[10px] font-bold mt-1 text-white">
                     3
                   </div> */}
                 </div>

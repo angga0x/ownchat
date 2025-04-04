@@ -14,9 +14,9 @@
   }
   
   :root {
-    --messenger-yellow: #facc15;
-    --messenger-yellow-light: #fde047;
-    --messenger-yellow-dark: #eab308;
+    --messenger-blue: #5b9cf1;
+    --messenger-blue-light: #7fb1f5;
+    --messenger-blue-dark: #4b87d8;
     --messenger-gray: #f1f0f0;
     --messenger-gray-dark: #e6e6e6;
     --dark-bg: #1e1e1e;
@@ -120,22 +120,26 @@
 
   /* Facebook Messenger style colors */
   .text-messenger-yellow {
-    color: var(--messenger-yellow);
+    color: var(--messenger-blue);
+  }
+  
+  .text-messenger-blue {
+    color: var(--messenger-blue);
   }
   
   /* Messenger gradients */
   .messenger-gradient {
-    background: linear-gradient(145deg, var(--messenger-yellow) 0%, var(--messenger-yellow-light) 100%);
+    background: linear-gradient(145deg, var(--messenger-blue) 0%, var(--messenger-blue-light) 100%);
   }
   
   .messenger-gradient-hover:hover {
-    background: linear-gradient(145deg, var(--messenger-yellow-dark) 0%, var(--messenger-yellow) 100%);
+    background: linear-gradient(145deg, var(--messenger-blue-dark) 0%, var(--messenger-blue) 100%);
   }
 
   /* Facebook Messenger style message bubbles */
   .messenger-bubble-sent {
-    background-color: var(--messenger-yellow);
-    color: black;
+    background-color: var(--messenger-blue);
+    color: white;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
@@ -146,8 +150,8 @@
   }
   
   .dark .messenger-bubble-sent {
-    background-color: var(--messenger-yellow);
-    color: black;
+    background-color: var(--messenger-blue);
+    color: white;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
   
@@ -195,7 +199,7 @@
     left: 0;
     right: 0;
     height: 3px;
-    background-color: var(--messenger-yellow);
+    background-color: var(--messenger-blue);
     border-radius: 3px 3px 0 0;
   }
   

@@ -315,7 +315,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
           <label 
             htmlFor="image-upload" 
             className={`flex items-center justify-center w-10 h-10 rounded-full cursor-pointer transition-colors duration-200
-              ${isUploading ? 'cursor-not-allowed text-muted-foreground' : 'text-messenger-yellow hover:bg-zinc-800'}`}
+              ${isUploading ? 'cursor-not-allowed text-muted-foreground' : 'text-messenger-blue hover:bg-gray-200 dark:hover:bg-zinc-800'}`}
             aria-label="Attach image"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -326,7 +326,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
         
         {/* Text Input - Facebook Messenger Style */}
         <div className="w-full max-w-[calc(100%-5.5rem)] relative messenger-input">
-          <div className="relative rounded-full overflow-hidden bg-gray-100 dark:bg-zinc-800 border-0 focus-within:ring-1 focus-within:ring-messenger-yellow">
+          <div className="relative rounded-full overflow-hidden bg-gray-100 dark:bg-zinc-800 border-0 focus-within:ring-1 focus-within:ring-messenger-blue">
             <Textarea 
               ref={textareaRef}
               id="message-input"
@@ -343,7 +343,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
             {/* Emoji Button */}
             <div className="absolute right-3 bottom-2">
               <div 
-                className="text-messenger-yellow cursor-pointer hover:text-messenger-yellow-light transition-colors"
+                className="text-messenger-blue cursor-pointer hover:text-messenger-blue-light transition-colors"
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
               >
                 <Smile className="h-5 w-5" />
@@ -392,7 +392,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
         
         {/* Voice message button */}
         <button 
-          className="flex items-center justify-center w-10 h-10 rounded-full text-messenger-yellow hover:bg-zinc-800 transition-colors"
+          className="flex items-center justify-center w-10 h-10 rounded-full text-messenger-blue hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors"
           aria-label="Voice message"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -405,7 +405,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
           className={`flex items-center justify-center w-10 h-10 rounded-full p-0 flex-shrink-0 transition-all duration-200
             ${(!messageText.trim() && !imageFile) || isUploading 
               ? 'bg-transparent text-muted-foreground cursor-not-allowed' 
-              : 'text-messenger-yellow hover:bg-zinc-800'}`}
+              : 'text-messenger-blue hover:bg-gray-200 dark:hover:bg-zinc-800'}`}
           onClick={handleSendMessage}
           disabled={(!messageText.trim() && !imageFile) || isUploading}
           variant="ghost"

@@ -99,7 +99,7 @@ export default function HomePage() {
             </Button>
           ) : (
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-messenger-yellow">
+              <h1 className="text-xl font-bold text-messenger-blue">
                 TeleChat
               </h1>
               {isMobile && (
@@ -114,7 +114,7 @@ export default function HomePage() {
           <div className="flex items-center space-x-2">
             <div className="flex items-center">
               <Avatar className="h-9 w-9 border border-gray-200 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800">
-                <AvatarFallback className="bg-gray-100 dark:bg-zinc-800 text-messenger-yellow font-medium">
+                <AvatarFallback className="bg-gray-100 dark:bg-zinc-800 text-messenger-blue font-medium">
                   {getInitials(user?.username || '')}
                 </AvatarFallback>
               </Avatar>
@@ -143,7 +143,7 @@ export default function HomePage() {
           <div className="flex items-center space-x-2">
             <div className="flex items-center">
               <Avatar className="h-9 w-9 border border-gray-200 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800">
-                <AvatarFallback className="bg-gray-100 dark:bg-zinc-800 text-messenger-yellow font-medium">
+                <AvatarFallback className="bg-gray-100 dark:bg-zinc-800 text-messenger-blue font-medium">
                   {getInitials(selectedUser.username)}
                 </AvatarFallback>
               </Avatar>
