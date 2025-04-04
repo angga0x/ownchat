@@ -22,6 +22,8 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [emojiShortcutActive, setEmojiShortcutActive] = useState(false);
+  const [emojiSearch, setEmojiSearch] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
@@ -42,6 +44,11 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
     const handleClickOutside = (event: MouseEvent) => {
       if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
         setShowEmojiPicker(false);
+        // Reset shortcut mode if active
+        if (emojiShortcutActive) {
+          setEmojiShortcutActive(false);
+          setEmojiSearch("");
+        }
       }
     };
     
@@ -49,21 +56,68 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [emojiShortcutActive]);
   
+  // Effect untuk mengatur fokus pada emoji search ketika mode shortcut aktif
+  useEffect(() => {
+    if (emojiShortcutActive && showEmojiPicker) {
+      // Berikan waktu untuk emoji picker untuk render
+      const timerId = setTimeout(() => {
+        // Cari elemen input pencarian di dalam emoji picker
+        const searchInput = document.querySelector('.epr-search-container input') as HTMLInputElement;
+        if (searchInput) {
+          searchInput.focus();
+          
+          // Jika ada term pencarian, isi input dengan term tersebut
+          if (emojiSearch) {
+            searchInput.value = emojiSearch;
+            
+            // Trigger event untuk memicu pencarian
+            const event = new Event('input', { bubbles: true });
+            searchInput.dispatchEvent(event);
+          }
+        }
+      }, 50);
+      
+      return () => clearTimeout(timerId);
+    }
+  }, [emojiShortcutActive, showEmojiPicker, emojiSearch]);
+
   // Handle emoji selection
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     const emoji = emojiData.emoji;
-    const cursorPosition = textareaRef.current?.selectionStart || messageText.length;
-    const updatedText = messageText.slice(0, cursorPosition) + emoji + messageText.slice(cursorPosition);
-    setMessageText(updatedText);
+    
+    // If in shortcut mode, replace the shortcut text with the emoji
+    if (emojiShortcutActive) {
+      const colonIndex = messageText.lastIndexOf(':');
+      if (colonIndex !== -1) {
+        const updatedText = messageText.substring(0, colonIndex) + emoji;
+        setMessageText(updatedText);
+        setEmojiShortcutActive(false);
+      } else {
+        // Fallback if somehow we're in shortcut mode but there's no colon
+        const cursorPosition = textareaRef.current?.selectionStart || messageText.length;
+        const updatedText = messageText.slice(0, cursorPosition) + emoji + messageText.slice(cursorPosition);
+        setMessageText(updatedText);
+      }
+    } else {
+      // Normal emoji insertion at cursor position
+      const cursorPosition = textareaRef.current?.selectionStart || messageText.length;
+      const updatedText = messageText.slice(0, cursorPosition) + emoji + messageText.slice(cursorPosition);
+      setMessageText(updatedText);
+    }
+    
+    // Close the emoji picker after selection
+    setShowEmojiPicker(false);
+    setEmojiShortcutActive(false);
+    setEmojiSearch("");
     
     // Focus back on the textarea after selecting an emoji
     setTimeout(() => {
       if (textareaRef.current) {
         textareaRef.current.focus();
-        textareaRef.current.selectionStart = cursorPosition + emoji.length;
-        textareaRef.current.selectionEnd = cursorPosition + emoji.length;
+        textareaRef.current.selectionStart = textareaRef.current.value.length;
+        textareaRef.current.selectionEnd = textareaRef.current.value.length;
       }
     }, 10);
   };
@@ -103,6 +157,27 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setMessageText(value);
+
+    // Check for emoji shortcut trigger with ":"
+    const lastChar = value.charAt(value.length - 1);
+    if (lastChar === ':' && !emojiShortcutActive) {
+      setEmojiShortcutActive(true);
+      setShowEmojiPicker(true);
+      setEmojiSearch("");
+    } else if (emojiShortcutActive) {
+      // If user deletes the colon, deactivate shortcut mode
+      if (!value.includes(':')) {
+        setEmojiShortcutActive(false);
+        setShowEmojiPicker(false);
+      } else {
+        // Extract the search term after the last colon
+        const colonIndex = value.lastIndexOf(':');
+        if (colonIndex !== -1 && colonIndex < value.length - 1) {
+          const searchTerm = value.substring(colonIndex + 1);
+          setEmojiSearch(searchTerm);
+        }
+      }
+    }
     
     // Only send typing notification if there's text
     if (value.trim()) {
@@ -291,11 +366,16 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
     }
   };
   
-  // Handle key press (send on Enter without Shift)
+  // Handle key press (send on Enter without Shift, or ESC to close emoji picker)
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    } else if (e.key === "Escape" && (showEmojiPicker || emojiShortcutActive)) {
+      // Close emoji picker on ESC key
+      setShowEmojiPicker(false);
+      setEmojiShortcutActive(false);
+      setEmojiSearch("");
     }
   };
   
@@ -332,7 +412,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
               id="message-input"
               rows={1}
               className="block w-full resize-none border-0 bg-transparent py-[11px] pl-4 pr-12 focus:outline-none min-h-[42px] max-h-[120px] text-base shadow-none text-gray-800 dark:text-white" 
-              placeholder="Aa"
+              placeholder="Aa (type : for emoji)"
               value={messageText}
               onChange={handleTextChange}
               onKeyPress={handleKeyPress}
@@ -344,7 +424,14 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
             <div className="absolute right-3 bottom-2.5">
               <div 
                 className="text-messenger-blue cursor-pointer hover:text-messenger-blue-light transition-colors"
-                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                onClick={() => {
+                  if (showEmojiPicker) {
+                    // If closing, reset shortcut mode
+                    setEmojiShortcutActive(false);
+                    setEmojiSearch("");
+                  }
+                  setShowEmojiPicker(!showEmojiPicker);
+                }}
               >
                 <Smile className="h-5 w-5" />
               </div>
@@ -358,12 +445,21 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
               >
                 <EmojiPicker
                   onEmojiClick={handleEmojiClick}
-                  theme={Theme.DARK}
+                  theme={Theme.AUTO}
                   width={320}
                   height={400}
                   previewConfig={{ showPreview: false }}
-                  searchPlaceHolder="Search emoji..."
+                  searchPlaceHolder={emojiShortcutActive ? "Type to search..." : "Search emoji..."}
+                  autoFocusSearch={emojiShortcutActive}
                 />
+                {emojiShortcutActive && (
+                  <div className="bg-gray-700/80 text-white text-xs p-2 rounded-b-md">
+                    <div className="flex items-center gap-1">
+                      <span className="bg-gray-600 text-xs px-1 py-0.5 rounded">:</span>
+                      <span>Shortcut mode active. Select an emoji or click outside to cancel.</span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
