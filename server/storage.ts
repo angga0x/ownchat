@@ -130,7 +130,10 @@ export class MongoStorage implements IStorage {
         ...insertMessage,
         timestamp: insertMessage.timestamp || new Date(),
         delivered: false,
-        read: false
+        read: false,
+        // Add a temporary ID to make the validator happy
+        // This will be overwritten by the pre-save hook
+        id: Date.now()
       });
       
       await newMessage.save();
