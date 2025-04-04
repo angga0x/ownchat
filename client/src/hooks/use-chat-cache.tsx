@@ -37,7 +37,18 @@ export function useChatCache(
     if (!currentUser || !selectedUser) return [];
     
     try {
-      const res = await apiRequest('GET', `/api/messages/${selectedUser.id}`);
+      // Ambil token dari localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+      
+      // Tambahkan token ke header
+      const headers = {
+        'Authorization': `Bearer ${token}`
+      };
+      
+      const res = await apiRequest('GET', `/api/messages/${selectedUser.id}`, undefined, headers);
       
       if (!res.ok) {
         throw new Error(`Failed to fetch messages: ${res.status}`);
