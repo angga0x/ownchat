@@ -90,18 +90,20 @@ export default function HomePage() {
   
   return (
     <div className="h-screen flex flex-col bg-background theme-transition">
-      {/* Header */}
-      <header className="bg-background border-b border-border py-3 px-4 sm:px-6 flex items-center justify-between shadow-sm z-10 theme-transition">
+      {/* Header - Facebook Messenger Style */}
+      <header className="bg-[#1e1e1e] dark:bg-[#1e1e1e] border-b border-zinc-800 py-3 px-4 sm:px-6 flex items-center justify-between shadow-sm z-10 theme-transition">
         <div className="flex items-center">
           {isMobile && selectedUser && !showUserList ? (
-            <Button variant="ghost" size="icon" onClick={handleBackToUserList} className="mr-2">
+            <Button variant="ghost" size="icon" onClick={handleBackToUserList} className="mr-2 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           ) : (
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-foreground bg-clip-text bg-gradient-to-r from-primary to-primary/80">TeleChat</h1>
+              <h1 className="text-xl font-bold text-messenger-yellow">
+                TeleChat
+              </h1>
               {isMobile && (
-                <Button variant="ghost" size="icon" onClick={() => setShowUserList(!showUserList)} className="ml-2">
+                <Button variant="ghost" size="icon" onClick={() => setShowUserList(!showUserList)} className="ml-2 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200">
                   <Users className="h-5 w-5" />
                 </Button>
               )}
@@ -109,40 +111,48 @@ export default function HomePage() {
           )}
         </div>
         {(!isMobile || (isMobile && !selectedUser)) && (
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
             <div className="flex items-center">
-              <Avatar className="h-8 w-8 border border-border">
-                <AvatarFallback className="bg-primary/10 text-primary">
+              <Avatar className="h-9 w-9 border border-zinc-700 bg-zinc-800">
+                <AvatarFallback className="bg-zinc-800 text-messenger-yellow font-medium">
                   {getInitials(user?.username || '')}
                 </AvatarFallback>
               </Avatar>
               <div className="ml-2 hidden sm:block">
-                <p className="text-sm font-medium text-foreground">@{user?.username}</p>
+                <p className="text-sm font-medium text-white">{user?.username}</p>
                 <div className="flex items-center">
                   <span className="bg-green-500 rounded-full h-2 w-2 mr-1.5"></span>
-                  <span className="text-xs text-muted-foreground">Online</span>
+                  <span className="text-xs text-zinc-400">Active now</span>
                 </div>
               </div>
               <span className="ml-2 bg-green-500 rounded-full h-2 w-2 sm:hidden"></span>
             </div>
             <ThemeToggle />
-            <Button variant="ghost" size="icon" onClick={handleLogout} disabled={logoutMutation.isPending}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleLogout} 
+              disabled={logoutMutation.isPending}
+              className="rounded-full w-9 h-9 bg-zinc-800 hover:bg-zinc-700 text-zinc-400"
+            >
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
         )}
         {isMobile && selectedUser && !showUserList && (
-          <div className="flex items-center space-x-3">
-            <Avatar className="h-8 w-8 border border-border">
-              <AvatarFallback className="bg-primary/10 text-primary">
-                {getInitials(selectedUser.username)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="ml-1">
-              <p className="text-sm font-medium text-foreground">@{selectedUser.username}</p>
-              <div className="flex items-center">
-                <span className={`${selectedUser.online ? "bg-green-500" : "bg-muted"} rounded-full h-2 w-2 mr-1.5`}></span>
-                <span className="text-xs text-muted-foreground">{selectedUser.online ? 'Online' : 'Offline'}</span>
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center">
+              <Avatar className="h-9 w-9 border border-zinc-700 bg-zinc-800">
+                <AvatarFallback className="bg-zinc-800 text-messenger-yellow font-medium">
+                  {getInitials(selectedUser.username)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="ml-2">
+                <p className="text-sm font-medium text-white">{selectedUser.username}</p>
+                <div className="flex items-center">
+                  <span className={`${selectedUser.online ? "bg-green-500" : "bg-zinc-500"} rounded-full h-2 w-2 mr-1.5`}></span>
+                  <span className="text-xs text-zinc-400">{selectedUser.online ? 'Active now' : 'Offline'}</span>
+                </div>
               </div>
             </div>
             <ThemeToggle />

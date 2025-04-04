@@ -44,6 +44,13 @@ export default {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        // Facebook Messenger specific colors
+        'messenger-yellow': '#facc15',
+        'messenger-yellow-light': '#fde047',
+        'messenger-yellow-dark': '#eab308',
+        'messenger-dark': '#1e1e1e',
+        'messenger-dark-lighter': '#2c2c2c',
+        'messenger-blue': '#0084ff',
         chart: {
           "1": "hsl(var(--chart-1))",
           "2": "hsl(var(--chart-2))",
