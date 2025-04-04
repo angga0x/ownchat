@@ -4,6 +4,10 @@ import { addMessageToCache, updateMessageStatusInCache } from "./chatCache";
 
 let socket: Socket | null = null;
 
+// Event handlers for message deletion
+const messageDeletedForMeHandlers: ((data: { messageId: number, userId: string }) => void)[] = [];
+const messageDeletedForAllHandlers: ((data: { messageId: number }) => void)[] = [];
+
 // Debounce function to control event frequency
 export function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
   let timeout: ReturnType<typeof setTimeout> | null = null;
@@ -112,6 +116,60 @@ export function setupSocket(token: string) {
     console.error("Socket.IO reconnection error:", error);
   });
   
+  // Set up message deletion handlers
+  socket.on("message_deleted_for_me", (data) => {
+    console.log("Message deleted for me:", data);
+    // Notify all registered handlers
+    messageDeletedForMeHandlers.forEach(handler => handler(data));
+    
+    // Update UI by removing the message from all conversations directly
+    // Update all active conversations by filtering out the deleted message
+    const allQueryKeys = queryClient.getQueryCache().getAll();
+    const currentUserId = queryClient.getQueryData<any>(["/api/user"])?.id?.toString();
+    
+    // Only apply the deletion if the current user is the one who deleted the message
+    if (currentUserId === data.userId) {
+      allQueryKeys.forEach(query => {
+        const queryKey = query.queryKey;
+        if (Array.isArray(queryKey) && queryKey[0] === '/api/messages') {
+          const messages = queryClient.getQueryData<any[]>(queryKey);
+          
+          if (messages) {
+            // Filter out the deleted message
+            const updatedMessages = messages.filter(msg => msg.id !== data.messageId);
+            
+            // Update the query cache with the filtered messages
+            queryClient.setQueryData(queryKey, updatedMessages);
+          }
+        }
+      });
+    }
+  });
+  
+  socket.on("message_deleted_for_all", (data) => {
+    console.log("Message deleted for all:", data);
+    // Notify all registered handlers
+    messageDeletedForAllHandlers.forEach(handler => handler(data));
+    
+    // Update UI by removing the message from all conversations directly
+    // Update all active conversations by filtering out the deleted message
+    const allQueryKeys = queryClient.getQueryCache().getAll();
+    
+    allQueryKeys.forEach(query => {
+      const queryKey = query.queryKey;
+      if (Array.isArray(queryKey) && queryKey[0] === '/api/messages') {
+        const messages = queryClient.getQueryData<any[]>(queryKey);
+        
+        if (messages) {
+          // Filter out the deleted message
+          const updatedMessages = messages.filter(msg => msg.id !== data.messageId);
+          
+          // Update the query cache with the filtered messages
+          queryClient.setQueryData(queryKey, updatedMessages);
+        }
+      }
+    });
+  });  
 
   
   return socket;
@@ -346,4 +404,158 @@ export function isUserTyping(userId: number): boolean {
   const typingKey = ['typing-status'];
   const typingStatus = queryClient.getQueryData<Record<number, boolean>>(typingKey) || {};
   return typingStatus[userId] || false;
+}
+
+// Register event handlers for message deletion
+export function onMessageDeletedForMe(handler: (data: { messageId: number, userId: string }) => void) {
+  messageDeletedForMeHandlers.push(handler);
+  return () => {
+    const index = messageDeletedForMeHandlers.indexOf(handler);
+    if (index !== -1) {
+      messageDeletedForMeHandlers.splice(index, 1);
+    }
+  };
+}
+
+export function onMessageDeletedForAll(handler: (data: { messageId: number }) => void) {
+  messageDeletedForAllHandlers.push(handler);
+  return () => {
+    const index = messageDeletedForAllHandlers.indexOf(handler);
+    if (index !== -1) {
+      messageDeletedForAllHandlers.splice(index, 1);
+    }
+  };
+}
+
+// Function to update UI when a message is deleted for a specific user
+function updateMessageDeletedForMe(messageId: number, userId: string) {
+  // Update all active conversations by filtering out the deleted message
+  const allQueryKeys = queryClient.getQueryCache().getAll();
+  const currentUserId = queryClient.getQueryData<any>(["/api/user"])?.id?.toString();
+  
+  // Only apply the deletion if the current user is the one who deleted the message
+  if (currentUserId !== userId) return;
+  
+  allQueryKeys.forEach(query => {
+    const queryKey = query.queryKey;
+    if (Array.isArray(queryKey) && queryKey[0] === '/api/messages') {
+      const messages = queryClient.getQueryData<any[]>(queryKey);
+      
+      if (messages) {
+        // Filter out the deleted message
+        const updatedMessages = messages.filter(msg => msg.id !== messageId);
+        
+        // Update the query cache with the filtered messages
+        queryClient.setQueryData(queryKey, updatedMessages);
+      }
+    }
+  });
+}
+
+// Function to update UI when a message is deleted for all users
+function updateMessageDeletedForAll(messageId: number) {
+  // Update all active conversations by filtering out the deleted message
+  const allQueryKeys = queryClient.getQueryCache().getAll();
+  
+  allQueryKeys.forEach(query => {
+    const queryKey = query.queryKey;
+    if (Array.isArray(queryKey) && queryKey[0] === '/api/messages') {
+      const messages = queryClient.getQueryData<any[]>(queryKey);
+      
+      if (messages) {
+        // Filter out the deleted message
+        const updatedMessages = messages.filter(msg => msg.id !== messageId);
+        
+        // Update the query cache with the filtered messages
+        queryClient.setQueryData(queryKey, updatedMessages);
+      }
+    }
+  });
+}
+
+// Function to delete a message for the current user only
+export function deleteMessageForMe(messageId: number) {
+  return fetch(`/api/messages/${messageId}/for-me`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  }).then(res => {
+    if (!res.ok) {
+      throw new Error("Failed to delete message");
+    }
+    return res.json();
+  });
+}
+
+// Function to delete a message for all users
+export function deleteMessageForAll(messageId: number) {
+  return fetch(`/api/messages/${messageId}/for-all`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  }).then(res => {
+    if (!res.ok) {
+      throw new Error("Failed to delete message for all");
+    }
+    return res.json();
+  });
+}
+
+// Functions for chat management
+export function pinChat(partnerId: number) {
+  return fetch(`/api/chats/${partnerId}/pin`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  }).then(res => {
+    if (!res.ok) {
+      throw new Error("Failed to pin chat");
+    }
+    return res.json();
+  });
+}
+
+export function unpinChat(partnerId: number) {
+  return fetch(`/api/chats/${partnerId}/unpin`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  }).then(res => {
+    if (!res.ok) {
+      throw new Error("Failed to unpin chat");
+    }
+    return res.json();
+  });
+}
+
+export function archiveChat(partnerId: number) {
+  return fetch(`/api/chats/${partnerId}/archive`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  }).then(res => {
+    if (!res.ok) {
+      throw new Error("Failed to archive chat");
+    }
+    return res.json();
+  });
+}
+
+export function unarchiveChat(partnerId: number) {
+  return fetch(`/api/chats/${partnerId}/unarchive`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  }).then(res => {
+    if (!res.ok) {
+      throw new Error("Failed to unarchive chat");
+    }
+    return res.json();
+  });
 }

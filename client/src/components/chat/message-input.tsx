@@ -212,6 +212,8 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
             timestamp: new Date(),
             delivered: false,
             read: false,
+            isDeleted: false,
+            deletedBy: [],
             isCurrentUser: true
           };
           
@@ -249,6 +251,8 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
             timestamp: new Date(),
             delivered: false,
             read: false,
+            isDeleted: false,
+            deletedBy: [],
             isCurrentUser: true
           };
           

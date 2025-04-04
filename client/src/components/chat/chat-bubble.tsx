@@ -1,6 +1,11 @@
 import { MessageWithUser } from "@shared/schema";
 import { format } from "date-fns";
 import { useState } from "react";
+import { deleteMessageForAll, deleteMessageForMe } from "@/lib/socket";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { MoreVertical, Trash, Trash2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface ChatBubbleProps {
   message: MessageWithUser;
@@ -11,6 +16,37 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
   const formattedTime = format(new Date(message.timestamp), "h:mm a");
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Handle message deletion for current user only
+  const handleDeleteForMe = async () => {
+    if (isDeleting) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteMessageForMe(message.id);
+      // The UI will be updated automatically by the socket event handler
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+  
+  // Handle message deletion for all users
+  const handleDeleteForAll = async () => {
+    if (isDeleting) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteMessageForAll(message.id);
+      // The UI will be updated automatically by the socket event handler
+    } catch (error) {
+      console.error("Failed to delete message for all:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
   
   // Facebook Messenger style read/delivered indicators
   const ReadIndicator = () => (
@@ -35,12 +71,52 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
     </span>
   );
   
+  // Message action menu for text messages
+  const MessageActions = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
+          <MoreVertical className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align={isCurrentUser ? "end" : "start"}>
+        <DropdownMenuItem onClick={handleDeleteForMe}>
+          <Trash className="h-4 w-4 mr-2" />
+          Delete for me
+        </DropdownMenuItem>
+        {isCurrentUser && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete for everyone
+              </DropdownMenuItem>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete message for everyone?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This message will be permanently deleted for all conversation participants.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteForAll} className="bg-destructive">Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   // Text-only message
   if (message.content && !message.imagePath) {
     return (
-      <div className={`flex items-end ${isCurrentUser ? "justify-end" : "justify-start"} mb-1.5 md:mb-2 bubble-appear`}>
+      <div className={`flex items-end group ${isCurrentUser ? "justify-end" : "justify-start"} mb-1.5 md:mb-2 bubble-appear`}>
+        {!isCurrentUser && <MessageActions />}
         <div className={`flex flex-col space-y-1 ${isCurrentUser ? "items-end" : "items-start"} max-w-[75%] sm:max-w-[65%] md:max-w-xs`}>
-          <div className={`px-3 py-2 
+          <div className={`px-3 py-2 relative
             ${isCurrentUser 
               ? "messenger-bubble-sent rounded-t-[20px] rounded-bl-[20px] rounded-br-[4px]" 
               : "messenger-bubble-received rounded-t-[20px] rounded-br-[20px] rounded-bl-[4px]"
@@ -52,6 +128,7 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
             {isCurrentUser && <ReadIndicator />}
           </div>
         </div>
+        {isCurrentUser && <MessageActions />}
       </div>
     );
   }
@@ -59,7 +136,8 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
   // Image-only or image-with-text message
   if (message.imagePath) {
     return (
-      <div className={`flex items-end ${isCurrentUser ? "justify-end" : "justify-start"} mb-1.5 md:mb-2 bubble-appear`}>
+      <div className={`flex items-end group ${isCurrentUser ? "justify-end" : "justify-start"} mb-1.5 md:mb-2 bubble-appear`}>
+        {!isCurrentUser && <MessageActions />}
         <div className={`flex flex-col space-y-1 ${isCurrentUser ? "items-end" : "items-start"} max-w-[75%] sm:max-w-[65%] md:max-w-xs`}>
           <div className={`overflow-hidden
             ${isCurrentUser 
@@ -103,6 +181,7 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
             {isCurrentUser && <ReadIndicator />}
           </div>
         </div>
+        {isCurrentUser && <MessageActions />}
       </div>
     );
   }
