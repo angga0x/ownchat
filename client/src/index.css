@@ -267,18 +267,35 @@
   
   /* Improved message input for Messenger style */
   .messenger-input-container {
-    @apply flex items-center gap-2 p-3 border-t;
-    background-color: var(--light-card);
-    border-color: #e4e6eb;
+    @apply flex items-center gap-2 p-3;
+    background-color: var(--light-bg);
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
   }
   
   .dark .messenger-input-container {
-    background-color: var(--dark-card);
-    border-color: var(--border);
+    background-color: var(--dark-bg);
+    box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
   }
   
   .messenger-input {
-    @apply flex-1 rounded-full px-4 py-2 bg-muted border-0 focus:ring-1 focus:ring-primary;
+    @apply flex-1 rounded-full;
+  }
+  
+  /* Styling messenger input field */
+  .messenger-input textarea {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .messenger-input textarea:focus {
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dark .messenger-input textarea {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+  
+  .dark .messenger-input textarea:focus {
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
   }
   
   /* Typing indicator style */
