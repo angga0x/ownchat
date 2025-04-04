@@ -26,12 +26,16 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #d1d5db;
-    border-radius: 5px;
+    @apply bg-muted-foreground/30 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
+    @apply bg-muted-foreground/50;
+  }
+
+  /* Theme transitions */
+  .theme-transition {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   }
   
   /* Telegram-like fast transitions */
@@ -54,11 +58,29 @@
       transform: translateY(0) scale(1);
     }
   }
+
+  /* Facebook Messenger style gradients */
+  .messenger-gradient {
+    background: linear-gradient(145deg, hsl(218, 92%, 60%) 0%, hsl(218, 92%, 65%) 100%);
+  }
+  
+  .messenger-gradient-hover:hover {
+    background: linear-gradient(145deg, hsl(218, 92%, 55%) 0%, hsl(218, 92%, 60%) 100%);
+  }
+
+  /* Message bubble styles */
+  .my-message-bubble {
+    @apply messenger-gradient text-white;
+  }
+  
+  .their-message-bubble {
+    @apply bg-muted text-foreground dark:bg-muted/80;
+  }
   
   /* Ensure touch interactions feel snappy */
   @media (hover: none) {
     .active\:bg-neutral-medium:active {
-      background-color: #f1f5f9;
+      @apply bg-muted/70;
     }
   }
   
@@ -74,5 +96,10 @@
     input, textarea, button {
       font-size: 16px !important; /* Prevents iOS zoom on focus */
     }
+  }
+  
+  /* Theme toggle button */
+  .theme-toggle {
+    @apply p-2 rounded-full bg-background border border-border hover:bg-muted transition-colors;
   }
 }

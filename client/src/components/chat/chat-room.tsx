@@ -88,32 +88,32 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
   // Empty state when no user is selected
   if (!selectedUser) {
     return (
-      <div className="h-full flex flex-col items-center justify-center bg-neutral-light p-4 md:p-8 text-center">
-        <div className="w-20 h-20 md:w-24 md:h-24 bg-primary-light rounded-full flex items-center justify-center mb-6 shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 md:h-12 md:w-12 text-primary" viewBox="0 0 20 20" fill="currentColor">
+      <div className="h-full flex flex-col items-center justify-center bg-background p-4 md:p-8 text-center theme-transition">
+        <div className="w-20 h-20 md:w-24 md:h-24 messenger-gradient rounded-full flex items-center justify-center mb-6 shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 md:h-12 md:w-12 text-white" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
           </svg>
         </div>
-        <h2 className="text-lg md:text-xl font-semibold text-gray-700 mb-2">Select a chat to start messaging</h2>
-        <p className="text-sm md:text-base text-gray-500 max-w-md">Choose a contact to start a conversation</p>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground mb-2">Select a chat to start messaging</h2>
+        <p className="text-sm md:text-base text-muted-foreground max-w-md">Choose a contact to start a conversation</p>
       </div>
     );
   }
   
   return (
-    <div className="h-full flex flex-col bg-neutral-light">
+    <div className="h-full flex flex-col bg-background theme-transition">
       {/* Chat Header - Hidden on Mobile as we show it in the main header instead */}
       {!isMobile && (
-        <div className="bg-white border-b border-gray-200 p-3 flex items-center space-x-3 shadow-sm">
+        <div className="bg-background border-b border-border p-3 flex items-center space-x-3 shadow-sm">
           <div className="relative">
             <div className={`w-10 h-10 ${getUserColor(selectedUser.username)} rounded-full flex items-center justify-center text-white font-medium shadow-sm`}>
               <span>{getInitials(selectedUser.username)}</span>
             </div>
-            <span className={`absolute bottom-0 right-0 ${selectedUser.online ? "bg-green-500" : "bg-gray-400"} h-2.5 w-2.5 rounded-full border-2 border-white`}></span>
+            <span className={`absolute bottom-0 right-0 ${selectedUser.online ? "bg-green-500" : "bg-muted-foreground"} h-2.5 w-2.5 rounded-full border-2 border-background`}></span>
           </div>
           <div className="flex-1">
-            <h2 className="font-medium text-gray-900">@{selectedUser.username}</h2>
-            <p className={`text-xs ${selectedUser.online ? "text-green-600" : "text-gray-500"}`}>
+            <h2 className="font-medium text-foreground">@{selectedUser.username}</h2>
+            <p className={`text-xs ${selectedUser.online ? "text-green-600" : "text-muted-foreground"}`}>
               {selectedUser.online ? "Online" : "Offline"}
             </p>
           </div>
@@ -121,27 +121,27 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
       )}
       
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent p-3 md:p-4" ref={scrollAreaRef}>
+      <div className="flex-1 overflow-y-auto p-3 md:p-4" ref={scrollAreaRef}>
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="animate-spin h-6 w-6 text-primary" />
-            <span className="ml-2 text-gray-500">Loading messages...</span>
+            <span className="ml-2 text-muted-foreground">Loading messages...</span>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="w-16 h-16 bg-neutral-medium rounded-full flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-muted-foreground" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
               </svg>
             </div>
-            <div className="text-gray-500 text-sm md:text-base">No messages yet. Start the conversation!</div>
+            <div className="text-muted-foreground text-sm md:text-base">No messages yet. Start the conversation!</div>
           </div>
         ) : (
           <>
             {Object.entries(groupedMessages).map(([date, msgs]) => (
               <div key={date} className="mb-4 md:mb-6">
                 <div className="text-center my-3 md:my-4 sticky top-0 z-10">
-                  <span className="text-xs text-gray-500 bg-neutral-light px-2 py-1 rounded shadow-sm">
+                  <span className="text-xs text-muted-foreground bg-background px-2 py-1 rounded shadow-sm">
                     {date}
                   </span>
                 </div>

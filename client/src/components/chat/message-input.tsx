@@ -187,7 +187,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
   };
   
   return (
-    <div className="bg-white border-t border-gray-200 p-3 sm:p-4">
+    <div className="bg-background border-t border-border p-3 sm:p-4 theme-transition">
       <div className="flex items-end space-x-2">
         {/* Image Upload */}
         <div className="relative flex-shrink-0">
@@ -202,7 +202,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
           <label 
             htmlFor="image-upload" 
             className={`flex items-center justify-center w-10 h-10 rounded-full cursor-pointer transition-colors duration-200
-              ${isUploading ? 'bg-neutral-medium cursor-not-allowed' : 'bg-neutral-light hover:bg-neutral-medium text-gray-600'}`}
+              ${isUploading ? 'bg-muted cursor-not-allowed' : 'bg-muted/50 hover:bg-muted text-muted-foreground'}`}
             aria-label="Attach image"
           >
             {isUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Image className="h-5 w-5" />}
@@ -215,7 +215,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
             ref={textareaRef}
             id="message-input"
             rows={1}
-            className="block w-full resize-none rounded-lg border border-gray-300 py-2 pl-3 pr-10 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary min-h-[36px] max-h-[120px] text-base" 
+            className="block w-full resize-none rounded-lg border-border py-2 pl-3 pr-10 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary min-h-[36px] max-h-[120px] text-base" 
             placeholder="Type a message..."
             value={messageText}
             onChange={handleTextChange}
@@ -226,7 +226,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
           
           {/* Image Preview */}
           {imagePreviewUrl && (
-            <div className="absolute bottom-full left-0 mb-2 w-48 h-48 bg-white border border-gray-300 rounded-md overflow-hidden shadow-lg">
+            <div className="absolute bottom-full left-0 mb-2 w-48 h-48 bg-background border border-border rounded-md overflow-hidden shadow-lg">
               <div className="relative w-full h-full">
                 <img 
                   className="w-full h-full object-cover" 
@@ -235,7 +235,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
                 />
                 <button 
                   type="button" 
-                  className="absolute top-1 right-1 bg-gray-800 bg-opacity-70 text-white rounded-full p-1 hover:bg-opacity-90 transition-opacity"
+                  className="absolute top-1 right-1 bg-background/80 text-foreground rounded-full p-1 hover:bg-background/95 transition-opacity"
                   onClick={removePreviewImage}
                   aria-label="Remove image"
                 >
@@ -248,10 +248,10 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
         
         {/* Send Button */}
         <Button 
-          className={`flex items-center justify-center w-10 h-10 rounded-full p-0 flex-shrink-0 transition-all duration-200
+          className={`flex items-center justify-center w-10 h-10 rounded-full p-0 flex-shrink-0 transition-all duration-200 messenger-gradient
             ${(!messageText.trim() && !imageFile) || isUploading 
               ? 'opacity-50 cursor-not-allowed' 
-              : 'opacity-100 hover:scale-105'}`}
+              : 'opacity-100 hover:scale-105 messenger-gradient-hover'}`}
           onClick={handleSendMessage}
           disabled={(!messageText.trim() && !imageFile) || isUploading}
           aria-label="Send message"

@@ -30,15 +30,15 @@ export default function AuthPage() {
   }
   
   return (
-    <div className="h-screen flex items-center justify-center bg-neutral-light">
+    <div className="h-screen flex items-center justify-center bg-background theme-transition">
       <div className="container mx-auto px-4 py-8 flex flex-col lg:flex-row items-center justify-center gap-8">
         {/* Left Side: Form */}
         <div className="w-full max-w-md">
-          <Card className="border-0 shadow-lg">
+          <Card className="border-border shadow-lg">
             <CardContent className="p-8">
               <div className="text-center mb-8">
-                <h1 className="text-2xl font-semibold text-gray-800">TeleChat</h1>
-                <p className="text-gray-500 mt-2">A simple messaging application</p>
+                <h1 className="text-2xl font-semibold text-foreground messenger-gradient bg-clip-text text-transparent">TeleChat</h1>
+                <p className="text-muted-foreground mt-2">A simple messaging application</p>
               </div>
               
               <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
@@ -62,8 +62,8 @@ export default function AuthPage() {
         {/* Right Side: Hero Content */}
         <div className="w-full max-w-md text-center lg:text-left">
           <div className="space-y-4">
-            <h2 className="text-3xl font-bold text-gray-800">Instant messaging made simple</h2>
-            <p className="text-lg text-gray-600">
+            <h2 className="text-3xl font-bold text-foreground">Instant messaging made simple</h2>
+            <p className="text-lg text-muted-foreground">
               Connect with friends and colleagues through a simple, fast, and secure messaging platform.
             </p>
             
@@ -82,14 +82,14 @@ export default function AuthPage() {
 function FeatureItem({ title, description }: { title: string; description: string }) {
   return (
     <div className="flex items-start space-x-3">
-      <div className="bg-primary rounded-full p-2 text-white mt-1">
+      <div className="messenger-gradient rounded-full p-2 text-white mt-1">
         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>
       </div>
       <div>
-        <h3 className="font-semibold text-gray-800">{title}</h3>
-        <p className="text-gray-600">{description}</p>
+        <h3 className="font-semibold text-foreground">{title}</h3>
+        <p className="text-muted-foreground">{description}</p>
       </div>
     </div>
   );
@@ -115,7 +115,7 @@ function LoginForm({ onSubmit, isPending }: { onSubmit: (data: any) => void, isP
               <FormLabel>Username</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">@</span>
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">@</span>
                   <Input placeholder="username" className="pl-8" {...field} />
                 </div>
               </FormControl>
@@ -174,7 +174,7 @@ function RegisterForm({ onSubmit, isPending }: { onSubmit: (data: any) => void, 
               <FormLabel>Username</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">@</span>
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">@</span>
                   <Input placeholder="Choose a username" className="pl-8" {...field} />
                 </div>
               </FormControl>

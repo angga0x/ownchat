@@ -53,9 +53,9 @@ export default function UserList({
   }, [isMobile]);
   
   return (
-    <div className="h-full w-full bg-white border-r border-gray-200 flex flex-col">
+    <div className="h-full w-full bg-background border-r border-border flex flex-col theme-transition">
       {/* Search */}
-      <div className="p-3 border-b border-gray-200">
+      <div className="p-3 border-b border-border">
         <div className="relative">
           <Input
             id="user-search"
@@ -66,14 +66,14 @@ export default function UserList({
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+            <Search className="h-5 w-5 text-muted-foreground" />
           </div>
         </div>
       </div>
       
       {/* User List */}
       <ScrollArea className="flex-1 overflow-y-auto">
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-border">
           {isLoading ? (
             // Loading skeletons
             Array(5).fill(0).map((_, index) => (
@@ -87,7 +87,7 @@ export default function UserList({
             ))
           ) : filteredUsers.length === 0 ? (
             // No users found
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-muted-foreground">
               No users found
             </div>
           ) : (
@@ -95,10 +95,10 @@ export default function UserList({
             filteredUsers.map((user) => (
               <div
                 key={user.id}
-                className={`p-3 cursor-pointer flex items-center space-x-3 transition-all duration-150 active:bg-neutral-medium
+                className={`p-3 cursor-pointer flex items-center space-x-3 transition-all duration-150 active:bg-muted/70
                   ${selectedUser?.id === user.id 
-                    ? "bg-neutral-light border-l-4 border-primary" 
-                    : "hover:bg-neutral-light"
+                    ? "bg-muted border-l-4 border-primary" 
+                    : "hover:bg-muted/50"
                   }`}
                 onClick={() => onSelectUser(user)}
               >
@@ -106,11 +106,11 @@ export default function UserList({
                   <div className={`w-12 h-12 ${getUserColor(user.username)} rounded-full flex items-center justify-center text-white font-medium shadow-sm`}>
                     <span>{getInitials(user.username)}</span>
                   </div>
-                  <span className={`absolute bottom-0 right-0 ${user.online ? "bg-green-500" : "bg-gray-400"} h-3 w-3 rounded-full border-2 border-white shadow-sm`}></span>
+                  <span className={`absolute bottom-0 right-0 ${user.online ? "bg-green-500" : "bg-muted-foreground"} h-3 w-3 rounded-full border-2 border-background shadow-sm`}></span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 truncate">@{user.username}</p>
-                  <p className="text-sm text-gray-500 truncate">
+                  <p className="font-medium text-foreground truncate">@{user.username}</p>
+                  <p className="text-sm text-muted-foreground truncate">
                     {user.online ? "Online" : "Offline"}
                   </p>
                 </div>

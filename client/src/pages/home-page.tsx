@@ -7,6 +7,7 @@ import ChatRoom from "@/components/chat/chat-room";
 import { ArrowLeft, LogOut, Menu, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
@@ -87,9 +88,9 @@ export default function HomePage() {
   };
   
   return (
-    <div className="h-screen flex flex-col bg-neutral-light">
+    <div className="h-screen flex flex-col bg-background theme-transition">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 py-3 px-4 sm:px-6 flex items-center justify-between shadow-sm z-10">
+      <header className="bg-background border-b border-border py-3 px-4 sm:px-6 flex items-center justify-between shadow-sm z-10 theme-transition">
         <div className="flex items-center">
           {isMobile && selectedUser && !showUserList ? (
             <Button variant="ghost" size="icon" onClick={handleBackToUserList} className="mr-2">
@@ -97,7 +98,7 @@ export default function HomePage() {
             </Button>
           ) : (
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-800">TeleChat</h1>
+              <h1 className="text-xl font-semibold text-foreground bg-clip-text bg-gradient-to-r from-primary to-primary/80">TeleChat</h1>
               {isMobile && (
                 <Button variant="ghost" size="icon" onClick={() => setShowUserList(!showUserList)} className="ml-2">
                   <Users className="h-5 w-5" />
@@ -107,22 +108,24 @@ export default function HomePage() {
           )}
         </div>
         {(!isMobile || (isMobile && !selectedUser)) && (
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             <div className="flex items-center">
               <span className="bg-green-500 rounded-full h-2 w-2 mr-2"></span>
-              <span className="text-sm font-medium text-gray-700 hidden sm:inline">
+              <span className="text-sm font-medium text-muted-foreground hidden sm:inline">
                 @{user?.username}
               </span>
             </div>
+            <ThemeToggle />
             <Button variant="ghost" size="icon" onClick={handleLogout} disabled={logoutMutation.isPending}>
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
         )}
         {isMobile && selectedUser && !showUserList && (
-          <div className="flex items-center">
-            <h2 className="font-medium text-gray-900">@{selectedUser.username}</h2>
-            <span className={`ml-2 ${selectedUser.online ? "bg-green-500" : "bg-gray-400"} h-2 w-2 rounded-full`}></span>
+          <div className="flex items-center space-x-3">
+            <h2 className="font-medium text-foreground">@{selectedUser.username}</h2>
+            <span className={`ml-2 ${selectedUser.online ? "bg-green-500" : "bg-muted"} h-2 w-2 rounded-full`}></span>
+            <ThemeToggle />
           </div>
         )}
       </header>
