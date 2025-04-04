@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { isUserTyping } from "@/lib/socket";
 
 interface UserListProps {
   users: User[];
@@ -12,6 +13,20 @@ interface UserListProps {
   selectedUser: User | null;
   onSelectUser: (user: User) => void;
   getInitials: (username: string) => string;
+}
+
+// Typing indicator component that shows animated dots
+function TypingIndicator() {
+  return (
+    <span className="inline-flex items-center">
+      <span className="flex space-x-1">
+        <span className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
+        <span className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
+        <span className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: "600ms" }}></span>
+      </span>
+      <span className="ml-1 text-primary">typing...</span>
+    </span>
+  );
 }
 
 export default function UserList({ 
@@ -91,7 +106,7 @@ export default function UserList({
             id="user-search"
             type="text"
             placeholder="Search in Messenger"
-            className="pl-10 py-2 h-10 bg-gray-100 dark:bg-zinc-800 border-0 text-gray-700 dark:text-zinc-200 rounded-full focus-visible:ring-1 focus-visible:ring-messenger-blue"
+            className="pl-10 py-2 h-10 bg-gray-100 dark:bg-zinc-800 border-0 text-gray-700 dark:text-zinc-200 rounded-full shadow-sm focus-visible:shadow-md focus-visible:ring-0 transition-shadow"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -138,12 +153,16 @@ export default function UserList({
                   <div className={`w-12 h-12 ${getUserColor(user.username)} rounded-full flex items-center justify-center text-white font-medium shadow-sm`}>
                     <span>{getInitials(user.username)}</span>
                   </div>
-                  <span className={`absolute bottom-0 right-0 ${user.online ? "bg-green-500" : "bg-zinc-500"} h-3 w-3 rounded-full border-2 ${user.online ? "border-white dark:border-[#1e1e1e]" : "border-white dark:border-[#1e1e1e]"} shadow-sm`}></span>
+                  <span className={`absolute bottom-0 right-0 ${user.online ? "bg-green-400/90" : "bg-zinc-500/50"} h-3 w-3 rounded-full border-2 ${user.online ? "border-white dark:border-[#1e1e1e]" : "border-white dark:border-[#1e1e1e]"} shadow-sm transition-colors`}></span>
                 </div>
-                <div className="flex-1 min-w-0 ml-3">
+                <div className="flex-1 min-w-0 ml-4">
                   <p className="font-medium text-gray-800 dark:text-white truncate">{user.username}</p>
                   <p className="text-sm text-gray-500 dark:text-zinc-400 truncate">
-                    {user.online ? "Active now" : "Offline"}
+                    {isUserTyping(user.id) ? (
+                      <TypingIndicator />
+                    ) : (
+                      user.online ? "Active now" : "Offline"
+                    )}
                   </p>
                 </div>
                 <div className="flex-shrink-0 flex flex-col items-end">

@@ -78,7 +78,23 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
           </svg>
         </div>
         <h2 className="text-lg md:text-xl font-semibold text-foreground mb-2">Select a chat to start messaging</h2>
-        <p className="text-sm md:text-base text-muted-foreground max-w-md">Choose a contact to start a conversation</p>
+        <p className="text-muted-foreground text-sm md:text-base max-w-md">
+          Kirim pesan pertama dan buat harimu lebih berwarna 🌈
+        </p>
+        <div className="mt-8 flex flex-wrap gap-4 justify-center max-w-md">
+          <div className="bg-blue-100 dark:bg-blue-900/30 p-4 rounded-lg text-center w-40">
+            <span className="block text-2xl mb-2">💬</span>
+            <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Chat dengan teman</p>
+          </div>
+          <div className="bg-purple-100 dark:bg-purple-900/30 p-4 rounded-lg text-center w-40">
+            <span className="block text-2xl mb-2">🎭</span>
+            <p className="text-sm font-medium text-purple-700 dark:text-purple-300">Kirim emoji & stiker</p>
+          </div>
+          <div className="bg-green-100 dark:bg-green-900/30 p-4 rounded-lg text-center w-40">
+            <span className="block text-2xl mb-2">📸</span>
+            <p className="text-sm font-medium text-green-700 dark:text-green-300">Bagikan foto</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -144,13 +160,18 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="w-20 h-20 bg-zinc-800 rounded-full flex items-center justify-center mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-messenger-yellow">
+            <div className="w-20 h-20 messenger-gradient rounded-full flex items-center justify-center mb-6 shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-white">
                 <path fillRule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clipRule="evenodd" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-white mb-2">No messages yet</h3>
-            <div className="text-zinc-400 text-sm">Send a message to start the conversation!</div>
+            <h3 className="text-lg font-medium text-foreground mb-2">Belum ada pesan</h3>
+            <div className="text-muted-foreground text-sm mb-8">
+              Mulailah percakapan sekarang!
+            </div>
+            <div className="bg-primary/10 dark:bg-primary/20 p-4 rounded-lg max-w-xs">
+              <p className="text-sm text-primary font-medium">"Hai, apa kabar? Senang bisa mengobrol denganmu!" 👋</p>
+            </div>
           </div>
         ) : (
           <>

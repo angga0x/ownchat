@@ -99,7 +99,7 @@ export default function HomePage() {
             </Button>
           ) : (
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-messenger-blue">
+              <h1 className="text-xl font-extrabold bg-gradient-to-r from-primary to-blue-400 text-transparent bg-clip-text">
                 TeleChat
               </h1>
               {isMobile && (
@@ -165,7 +165,7 @@ export default function HomePage() {
         {/* User List */}
         <div className={`${isMobile ? 'absolute inset-0 z-20 transition-transform duration-300 transform' : 'relative'} 
           ${(isMobile && !showUserList) ? '-translate-x-full' : 'translate-x-0'} 
-          ${!isMobile ? 'w-full md:w-80 lg:w-96 flex-shrink-0 border-r border-gray-200 dark:border-zinc-800' : 'w-full'}`}>
+          ${!isMobile ? 'w-full md:w-72 lg:w-80 flex-shrink-0 border-r border-gray-200 dark:border-zinc-800' : 'w-full'}`}>
           <UserList 
             users={filteredUsers} 
             isLoading={isLoadingUsers}

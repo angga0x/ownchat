@@ -236,15 +236,20 @@
   }
   
   .messenger-user-item {
-    @apply flex items-center p-3 rounded-lg cursor-pointer transition-colors;
+    @apply flex items-center p-3 rounded-lg cursor-pointer transition-all;
+    position: relative;
+    overflow: hidden;
   }
   
   .messenger-user-item:hover {
     background-color: var(--light-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
   }
   
   .dark .messenger-user-item:hover {
     background-color: var(--dark-hover);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   }
   
   .messenger-user-item.active {
@@ -253,6 +258,11 @@
   
   .dark .messenger-user-item.active {
     background-color: var(--dark-hover);
+  }
+  
+  /* Hover right panel for context menu */
+  .messenger-user-item:hover .context-menu-icon {
+    opacity: 1;
   }
   
   /* Improved message input for Messenger style */
@@ -308,6 +318,46 @@
     }
     100% {
       transform: translateY(0);
+    }
+  }
+  
+  /* New version of the typing indicator with dots */
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    column-gap: 3px;
+    margin-right: 4px;
+  }
+  
+  .typing-indicator .dot {
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--messenger-blue);
+    animation: typingAnimation 1.4s infinite;
+  }
+  
+  .typing-indicator .dot:nth-child(1) {
+    animation-delay: 0ms;
+  }
+  
+  .typing-indicator .dot:nth-child(2) {
+    animation-delay: 200ms;
+  }
+  
+  .typing-indicator .dot:nth-child(3) {
+    animation-delay: 400ms;
+  }
+  
+  @keyframes typingAnimation {
+    0%, 100% {
+      transform: translateY(0);
+      opacity: 0.5;
+    }
+    50% {
+      transform: translateY(-2px);
+      opacity: 1;
     }
   }
 }
