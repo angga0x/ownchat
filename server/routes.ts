@@ -50,6 +50,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Create Socket.IO server
   const io = new SocketIOServer(httpServer, {
+    transports: ['websocket'], // Force WebSocket only, no polling
     cors: {
       origin: "*",
       methods: ["GET", "POST"]

@@ -9,8 +9,9 @@ export function setupSocket(token: string) {
     socket.disconnect();
   }
   
-  // Create new Socket.IO connection
+  // Create new Socket.IO connection - WebSocket only, no polling
   socket = io({
+    transports: ['websocket'], // Force WebSocket only mode
     autoConnect: true,
     reconnection: true,
     reconnectionAttempts: 5,
