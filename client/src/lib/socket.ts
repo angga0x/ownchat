@@ -111,6 +111,16 @@ export function sendMessage(receiverId: number, content: string) {
     receiverId,
     content
   });
+
+  // Optimistically update the UI immediately with the sent message
+  socket.once("message_sent", (message) => {
+    // When a message is sent, update the messages query
+    const queryKey = ["/api/messages", receiverId];
+    
+    // Optimistically update cache with the new message
+    const existingMessages = queryClient.getQueryData<any[]>(queryKey) || [];
+    queryClient.setQueryData(queryKey, [...existingMessages, message]);
+  });
 }
 
 export function sendImageMessage(receiverId: number, imagePath: string) {
@@ -121,6 +131,16 @@ export function sendImageMessage(receiverId: number, imagePath: string) {
   socket.emit("image_message", {
     receiverId,
     imagePath
+  });
+
+  // Optimistically update the UI immediately with the sent image message
+  socket.once("image_message_sent", (data) => {
+    // When a message is sent, update the messages query
+    const queryKey = ["/api/messages", receiverId];
+    
+    // Optimistically update cache with the new message
+    const existingMessages = queryClient.getQueryData<any[]>(queryKey) || [];
+    queryClient.setQueryData(queryKey, [...existingMessages, data.message]);
   });
 }
 
