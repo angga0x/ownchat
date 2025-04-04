@@ -133,20 +133,36 @@ export function sendMessage(receiverId: number, content: string) {
     throw new Error("Socket.IO connection not open");
   }
   
+  // Hapus semua listener 'message_sent' sebelumnya untuk mencegah penumpukan
+  socket.off("message_sent");
+  
+  // Tambahkan listener baru
+  socket.on("message_sent", (message) => {
+    console.log("Message sent confirmation:", message);
+    
+    const userQuery = queryClient.getQueryData<any>(["/api/user"]);
+    if (!userQuery || !userQuery.id) return;
+    
+    // Update both sides of the conversation immediately
+    // 1. Update receiver's side
+    const receiverQueryKey = ["/api/messages", receiverId];
+    const receiverMessages = queryClient.getQueryData<any[]>(receiverQueryKey) || [];
+    queryClient.setQueryData(receiverQueryKey, [...receiverMessages, message]);
+    
+    // 2. Update sender's side (current user's view of the conversation)
+    const senderQueryKey = ["/api/messages", message.senderId];
+    const senderMessages = queryClient.getQueryData<any[]>(senderQueryKey) || [];
+    queryClient.setQueryData(senderQueryKey, [...senderMessages, message]);
+    
+    // Invalidate both queries to ensure data consistency
+    queryClient.invalidateQueries({ queryKey: receiverQueryKey });
+    queryClient.invalidateQueries({ queryKey: senderQueryKey });
+  });
+  
+  // Kirim pesan
   socket.emit("private_message", {
     receiverId,
     content
-  });
-
-  // Log confirmation when message is sent (for debugging and confirmation)
-  socket.once("message_sent", (message) => {
-    console.log("Message sent confirmation:", message);
-    
-    // When a message is sent, update the messages query
-    const queryKey = ["/api/messages", receiverId];
-    
-    // Invalidate the query to force a refetch with the new message
-    queryClient.invalidateQueries({ queryKey });
   });
 }
 
@@ -155,40 +171,70 @@ export function sendImageMessage(receiverId: number, imagePath: string) {
     throw new Error("Socket.IO connection not open");
   }
   
+  // Hapus semua listener 'image_message_sent' sebelumnya untuk mencegah penumpukan
+  socket.off("image_message_sent");
+  
+  // Tambahkan listener baru
+  socket.on("image_message_sent", (data) => {
+    console.log("Image message sent confirmation:", data.message);
+    
+    const userQuery = queryClient.getQueryData<any>(["/api/user"]);
+    if (!userQuery || !userQuery.id) return;
+    
+    const message = data.message;
+    
+    // Update both sides of the conversation immediately
+    // 1. Update receiver's side
+    const receiverQueryKey = ["/api/messages", receiverId];
+    const receiverMessages = queryClient.getQueryData<any[]>(receiverQueryKey) || [];
+    queryClient.setQueryData(receiverQueryKey, [...receiverMessages, message]);
+    
+    // 2. Update sender's side (current user's view of the conversation)
+    const senderQueryKey = ["/api/messages", message.senderId];
+    const senderMessages = queryClient.getQueryData<any[]>(senderQueryKey) || [];
+    queryClient.setQueryData(senderQueryKey, [...senderMessages, message]);
+    
+    // Invalidate both queries to ensure data consistency
+    queryClient.invalidateQueries({ queryKey: receiverQueryKey });
+    queryClient.invalidateQueries({ queryKey: senderQueryKey });
+  });
+  
+  // Kirim pesan gambar
   socket.emit("image_message", {
     receiverId,
     imagePath
   });
-
-  // Log confirmation and invalidate the query to refresh data
-  socket.once("image_message_sent", (data) => {
-    console.log("Image message sent confirmation:", data.message);
-    
-    // When a message is sent, update the messages query
-    const queryKey = ["/api/messages", receiverId];
-    
-    // Invalidate the query to force a refetch with the new message
-    queryClient.invalidateQueries({ queryKey });
-  });
 }
 
 function handleIncomingMessage(message: any) {
-  // When receiving a new message, invalidate the messages query to trigger a refetch
-  const queryKey = ["/api/messages", message.senderId];
-  
-  // Optimistically update cache
-  const existingMessages = queryClient.getQueryData<any[]>(queryKey) || [];
-  queryClient.setQueryData(queryKey, [...existingMessages, message]);
-  
-  // Also invalidate to ensure we have the latest data
-  queryClient.invalidateQueries({ queryKey });
-  
-  // Update the localStorage cache with the new message
-  // Cari user ID dari data yang tersimpan
   const userQuery = queryClient.getQueryData<any>(["/api/user"]);
-  if (userQuery && userQuery.id) {
-    // Tambahkan pesan ke cache lokal
-    addMessageToCache(userQuery.id, message.senderId, message);
+  if (!userQuery || !userQuery.id) return;
+  
+  const currentUserId = userQuery.id;
+  
+  // Perbarui cache untuk conversation penerima
+  const receiverQueryKey = ["/api/messages", message.senderId];
+  const existingReceiverMessages = queryClient.getQueryData<any[]>(receiverQueryKey) || [];
+  queryClient.setQueryData(receiverQueryKey, [...existingReceiverMessages, message]);
+  
+  // Perbarui juga cache untuk conversation pengirim
+  const senderQueryKey = ["/api/messages", message.receiverId];
+  const existingSenderMessages = queryClient.getQueryData<any[]>(senderQueryKey) || [];
+  queryClient.setQueryData(senderQueryKey, [...existingSenderMessages, message]);
+  
+  // Invalidate both query caches to ensure we have the latest data
+  queryClient.invalidateQueries({ queryKey: receiverQueryKey });
+  queryClient.invalidateQueries({ queryKey: senderQueryKey });
+  
+  // Tambahkan pesan ke cache lokal
+  addMessageToCache(currentUserId, message.senderId, message);
+  
+  // Jika pesan dikirim ke user saat ini, tambahkan juga ke cache konversasi tersebut
+  if (message.receiverId === currentUserId) {
+    addMessageToCache(currentUserId, message.senderId, message);
+  } else if (message.senderId === currentUserId) {
+    // Jika pesan dikirim oleh user saat ini, tambahkan ke cache konversasi penerima
+    addMessageToCache(currentUserId, message.receiverId, message);
   }
 }
 
