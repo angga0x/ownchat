@@ -53,15 +53,27 @@ export default function UserList({
   }, [isMobile]);
   
   return (
-    <div className="h-full w-full bg-background border-r border-border flex flex-col theme-transition">
+    <div className="h-full w-full bg-[#1e1e1e] dark:bg-[#1e1e1e] border-r border-zinc-800 flex flex-col theme-transition messenger-sidebar">
+      {/* Header */}
+      <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
+        <h1 className="text-xl font-bold text-foreground">Chats</h1>
+        <div className="flex space-x-2">
+          <button className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center text-foreground transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      
       {/* Search */}
-      <div className="p-3 border-b border-border">
+      <div className="p-3">
         <div className="relative">
           <Input
             id="user-search"
             type="text"
-            placeholder="Search users..."
-            className="pl-10 py-2 h-10"
+            placeholder="Search messages..."
+            className="pl-10 py-2 h-10 bg-zinc-800 border-0 rounded-full"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -73,7 +85,7 @@ export default function UserList({
       
       {/* User List */}
       <ScrollArea className="flex-1 overflow-y-auto">
-        <div className="divide-y divide-border">
+        <div className="p-2 space-y-1">
           {isLoading ? (
             // Loading skeletons
             Array(5).fill(0).map((_, index) => (
@@ -95,24 +107,24 @@ export default function UserList({
             filteredUsers.map((user) => (
               <div
                 key={user.id}
-                className={`p-3 cursor-pointer flex items-center space-x-3 transition-all duration-150 active:bg-muted/70
-                  ${selectedUser?.id === user.id 
-                    ? "bg-muted border-l-4 border-primary" 
-                    : "hover:bg-muted/50"
-                  }`}
+                className={`messenger-user-item ${selectedUser?.id === user.id ? "active" : ""}`}
                 onClick={() => onSelectUser(user)}
               >
                 <div className="relative flex-shrink-0">
                   <div className={`w-12 h-12 ${getUserColor(user.username)} rounded-full flex items-center justify-center text-white font-medium shadow-sm`}>
                     <span>{getInitials(user.username)}</span>
                   </div>
-                  <span className={`absolute bottom-0 right-0 ${user.online ? "bg-green-500" : "bg-muted-foreground"} h-3 w-3 rounded-full border-2 border-background shadow-sm`}></span>
+                  <span className={`absolute bottom-0 right-0 ${user.online ? "bg-green-500" : "bg-zinc-500"} h-3 w-3 rounded-full border-2 border-[#1e1e1e] shadow-sm`}></span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground truncate">@{user.username}</p>
+                <div className="flex-1 min-w-0 ml-3">
+                  <p className="font-medium text-foreground truncate">{user.username}</p>
                   <p className="text-sm text-muted-foreground truncate">
-                    {user.online ? "Online" : "Offline"}
+                    {user.online ? "Active now" : "Offline"}
                   </p>
+                </div>
+                <div className="flex-shrink-0 flex flex-col items-end">
+                  <div className="text-xs text-zinc-500">2m</div>
+                  {/* You could add notification badge here for new messages */}
                 </div>
               </div>
             ))

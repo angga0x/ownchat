@@ -7,7 +7,7 @@ import ChatRoom from "@/components/chat/chat-room";
 import { ArrowLeft, LogOut, Users, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ThemeToggle, ThemeManager } from "@/components/ui/theme-toggle";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function HomePage() {

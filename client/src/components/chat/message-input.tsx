@@ -300,8 +300,8 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
   };
   
   return (
-    <div className="bg-background border-t border-border p-3 sm:p-4 theme-transition">
-      <div className="flex items-end space-x-2">
+    <div className="bg-[#1e1e1e] dark:bg-[#1e1e1e] border-t border-zinc-800 p-3 sm:p-4 theme-transition messenger-input-container">
+      <div className="flex items-center space-x-2">
         {/* Image Upload - Facebook Messenger Style */}
         <div className="relative flex-shrink-0">
           <input 
@@ -315,16 +315,18 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
           <label 
             htmlFor="image-upload" 
             className={`flex items-center justify-center w-10 h-10 rounded-full cursor-pointer transition-colors duration-200
-              ${isUploading ? 'cursor-not-allowed text-muted-foreground' : 'text-messenger-blue hover:bg-muted/50'}`}
+              ${isUploading ? 'cursor-not-allowed text-muted-foreground' : 'text-messenger-yellow hover:bg-zinc-800'}`}
             aria-label="Attach image"
           >
-            {isUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Image className="h-5 w-5" />}
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
           </label>
         </div>
         
         {/* Text Input - Facebook Messenger Style */}
-        <div className="flex-1 relative">
-          <div className="relative rounded-full overflow-hidden bg-muted/50 dark:bg-muted/30 border-0 focus-within:ring-1 focus-within:ring-messenger-blue focus-within:bg-background">
+        <div className="flex-1 relative messenger-input">
+          <div className="relative rounded-full overflow-hidden bg-zinc-800 dark:bg-zinc-800 border-0 focus-within:ring-1 focus-within:ring-messenger-yellow">
             <Textarea 
               ref={textareaRef}
               id="message-input"
@@ -341,7 +343,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
             {/* Emoji Button */}
             <div className="absolute right-3 bottom-2">
               <div 
-                className="text-messenger-blue cursor-pointer"
+                className="text-messenger-yellow cursor-pointer hover:text-messenger-yellow-light transition-colors"
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
               >
                 <Smile className="h-5 w-5" />
@@ -356,11 +358,11 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
               >
                 <EmojiPicker
                   onEmojiClick={handleEmojiClick}
-                  theme={Theme.AUTO}
+                  theme={Theme.DARK}
                   width={320}
                   height={400}
                   previewConfig={{ showPreview: false }}
-                  searchPlaceHolder="Cari emoji..."
+                  searchPlaceHolder="Search emoji..."
                 />
               </div>
             )}
@@ -368,7 +370,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
           
           {/* Image Preview - Updated for Messenger Style */}
           {imagePreviewUrl && (
-            <div className="absolute bottom-full left-0 mb-2 w-52 h-52 bg-background rounded-lg overflow-hidden shadow-lg border border-border">
+            <div className="absolute bottom-full left-0 mb-2 w-52 h-52 bg-zinc-800 rounded-lg overflow-hidden shadow-lg border border-zinc-700">
               <div className="relative w-full h-full">
                 <img 
                   className="w-full h-full object-cover" 
@@ -377,7 +379,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
                 />
                 <button 
                   type="button" 
-                  className="absolute top-2 right-2 bg-background/80 text-foreground rounded-full p-1.5 hover:bg-background transition-colors"
+                  className="absolute top-2 right-2 bg-zinc-900/80 text-white rounded-full p-1.5 hover:bg-zinc-800 transition-colors"
                   onClick={removePreviewImage}
                   aria-label="Remove image"
                 >
@@ -388,12 +390,22 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
           )}
         </div>
         
+        {/* Voice message button */}
+        <button 
+          className="flex items-center justify-center w-10 h-10 rounded-full text-messenger-yellow hover:bg-zinc-800 transition-colors"
+          aria-label="Voice message"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+          </svg>
+        </button>
+        
         {/* Send Button - Facebook Messenger Style */}
         <Button 
           className={`flex items-center justify-center w-10 h-10 rounded-full p-0 flex-shrink-0 transition-all duration-200
             ${(!messageText.trim() && !imageFile) || isUploading 
               ? 'bg-transparent text-muted-foreground cursor-not-allowed' 
-              : 'text-messenger-blue hover:bg-muted/50'}`}
+              : 'text-messenger-yellow hover:bg-zinc-800'}`}
           onClick={handleSendMessage}
           disabled={(!messageText.trim() && !imageFile) || isUploading}
           variant="ghost"

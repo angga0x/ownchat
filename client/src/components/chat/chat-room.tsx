@@ -84,61 +84,82 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
   }
   
   return (
-    <div className="h-full flex flex-col bg-background theme-transition">
-      {/* Chat Header - Hidden on Mobile as we show it in the main header instead */}
+    <div className="h-full flex flex-col bg-[#1e1e1e] dark:bg-[#1e1e1e] theme-transition messenger-chat-area">
+      {/* Chat Header - Facebook Messenger Style */}
       {!isMobile && (
-        <div className="bg-background border-b border-border p-3 sm:p-4 flex items-center space-x-3 shadow-sm">
-          <div className="relative">
-            <div className={`w-10 h-10 ${getUserColor(selectedUser.username)} rounded-full flex items-center justify-center text-white font-medium shadow-sm`}>
-              <span>{getInitials(selectedUser.username)}</span>
+        <div className="bg-[#1e1e1e] dark:bg-[#1e1e1e] border-b border-zinc-800 p-4 flex items-center justify-between shadow-sm messenger-header">
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <div className={`w-10 h-10 ${getUserColor(selectedUser.username)} rounded-full flex items-center justify-center text-white font-medium shadow-sm`}>
+                <span>{getInitials(selectedUser.username)}</span>
+              </div>
+              <span className={`absolute bottom-0 right-0 ${selectedUser.online ? "bg-green-500" : "bg-zinc-500"} h-2.5 w-2.5 rounded-full border-2 border-[#1e1e1e]`}></span>
             </div>
-            <span className={`absolute bottom-0 right-0 ${selectedUser.online ? "bg-green-500" : "bg-muted-foreground"} h-2.5 w-2.5 rounded-full border-2 border-background`}></span>
+            <div>
+              <h2 className="font-medium text-foreground">{selectedUser.username}</h2>
+              <div className="text-xs flex items-center">
+                {selectedUser.online ? (
+                  <>
+                    <span className="text-green-500">Active now</span>
+                    {isUserTyping(selectedUser.id) && (
+                      <span className="ml-2 text-zinc-400">• typing...</span>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-zinc-400">Offline</span>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="flex-1">
-            <h2 className="font-medium text-foreground">@{selectedUser.username}</h2>
-            <div className="text-xs flex items-center">
-              {selectedUser.online ? (
-                <>
-                  <span className="inline-block h-2 w-2 rounded-full bg-green-500 mr-1.5"></span>
-                  <span className="text-green-600">Online</span>
-                  {isUserTyping(selectedUser.id) && (
-                    <span className="ml-2 text-muted-foreground">(sedang mengetik...)</span>
-                  )}
-                </>
-              ) : (
-                <span className="text-muted-foreground">Offline</span>
-              )}
-            </div>
+          
+          {/* Header Actions */}
+          <div className="flex space-x-1">
+            <button className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-400 hover:bg-zinc-800 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+              </svg>
+            </button>
+            <button className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-400 hover:bg-zinc-800 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </button>
+            <button className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-400 hover:bg-zinc-800 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+              </svg>
+            </button>
           </div>
         </div>
       )}
       
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:pr-8" ref={scrollAreaRef}>
+      <div className="flex-1 overflow-y-auto p-4 md:px-8" ref={scrollAreaRef}>
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
-            <Loader2 className="animate-spin h-6 w-6 text-primary" />
-            <span className="ml-2 text-muted-foreground">Loading messages...</span>
+            <Loader2 className="animate-spin h-6 w-6 text-messenger-yellow" />
+            <span className="ml-2 text-zinc-400">Loading messages...</span>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-muted-foreground" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+            <div className="w-20 h-20 bg-zinc-800 rounded-full flex items-center justify-center mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-messenger-yellow">
+                <path fillRule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clipRule="evenodd" />
               </svg>
             </div>
-            <div className="text-muted-foreground text-sm md:text-base">No messages yet. Start the conversation!</div>
+            <h3 className="text-lg font-medium text-white mb-2">No messages yet</h3>
+            <div className="text-zinc-400 text-sm">Send a message to start the conversation!</div>
           </div>
         ) : (
           <>
             {Object.entries(groupedMessages).map(([date, msgs]) => (
-              <div key={date} className="mb-4 md:mb-6">
-                <div className="text-center my-3 md:my-4 sticky top-0 z-10">
-                  <span className="text-xs text-muted-foreground bg-background px-2 py-1 rounded shadow-sm">
+              <div key={date} className="mb-6">
+                <div className="text-center mb-6 sticky top-0 z-10">
+                  <span className="text-xs bg-zinc-800 text-zinc-400 px-4 py-1.5 rounded-full shadow-sm">
                     {date}
                   </span>
                 </div>
-                <div className="space-y-2 md:space-y-4">
+                <div className="space-y-1">
                   {(msgs as MessageWithUser[]).map((message) => (
                     <ChatBubble
                       key={message.id}
@@ -161,7 +182,7 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
                     </div>
                   </div>
                   <div className="flex items-center px-1 space-x-1">
-                    <span className="text-[10px] text-muted-foreground leading-none">@{selectedUser.username} is typing...</span>
+                    <span className="text-[10px] text-zinc-500 leading-none">{selectedUser.username} is typing...</span>
                   </div>
                 </div>
               </div>

@@ -14,10 +14,37 @@
   }
   
   :root {
-    --messenger-blue: #0084ff;
-    --messenger-blue-light: #00a2ff;
+    --messenger-yellow: #facc15;
+    --messenger-yellow-light: #fde047;
+    --messenger-yellow-dark: #eab308;
     --messenger-gray: #f1f0f0;
     --messenger-gray-dark: #e6e6e6;
+    --dark-bg: #1e1e1e;
+    --dark-card: #2c2c2c;
+    --dark-bubble: #2c2c2c;
+    --dark-hover: #3a3a3a;
+  }
+
+  .dark {
+    --background: 0 0% 12%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 17%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 51 95% 53%;
+    --primary-foreground: 0 0% 12%;
+    --secondary: 0 0% 17%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 0 0% 25%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 51 95% 53%;
   }
 }
 
@@ -67,23 +94,23 @@
   }
 
   /* Facebook Messenger style colors */
-  .text-messenger-blue {
-    color: var(--messenger-blue);
+  .text-messenger-yellow {
+    color: var(--messenger-yellow);
   }
   
   /* Messenger gradients */
   .messenger-gradient {
-    background: linear-gradient(145deg, var(--messenger-blue) 0%, var(--messenger-blue-light) 100%);
+    background: linear-gradient(145deg, var(--messenger-yellow) 0%, var(--messenger-yellow-light) 100%);
   }
   
   .messenger-gradient-hover:hover {
-    background: linear-gradient(145deg, #0078e9 0%, #0095ea 100%);
+    background: linear-gradient(145deg, var(--messenger-yellow-dark) 0%, var(--messenger-yellow) 100%);
   }
 
   /* Facebook Messenger style message bubbles */
   .messenger-bubble-sent {
-    background-color: var(--messenger-blue);
-    color: white;
+    background-color: var(--messenger-yellow);
+    color: black;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
@@ -93,9 +120,16 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
   
+  .dark .messenger-bubble-sent {
+    background-color: var(--messenger-yellow);
+    color: black;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
   .dark .messenger-bubble-received {
-    background-color: #3a3b3c;
+    background-color: var(--dark-bubble);
     color: #e4e6eb;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
   /* Ensure touch interactions feel snappy */
@@ -136,8 +170,46 @@
     left: 0;
     right: 0;
     height: 3px;
-    background-color: var(--messenger-blue);
+    background-color: var(--messenger-yellow);
     border-radius: 3px 3px 0 0;
+  }
+  
+  /* Messenger UI Elements */
+  .messenger-header {
+    @apply flex items-center justify-between h-16 px-4 border-b dark:border-zinc-800;
+    background-color: var(--dark-bg);
+  }
+  
+  .messenger-sidebar {
+    @apply w-full h-full bg-card border-r dark:border-zinc-800;
+    background-color: var(--dark-card);
+  }
+  
+  .messenger-chat-area {
+    @apply flex flex-col h-full;
+    background-color: var(--dark-bg);
+  }
+  
+  .messenger-user-item {
+    @apply flex items-center p-3 rounded-lg cursor-pointer transition-colors;
+  }
+  
+  .messenger-user-item:hover {
+    background-color: var(--dark-hover);
+  }
+  
+  .messenger-user-item.active {
+    background-color: var(--dark-hover);
+  }
+  
+  /* Improved message input for Messenger style */
+  .messenger-input-container {
+    @apply flex items-center gap-2 p-3 border-t dark:border-zinc-800;
+    background-color: var(--dark-card);
+  }
+  
+  .messenger-input {
+    @apply flex-1 rounded-full px-4 py-2 bg-muted border-0 focus:ring-1 focus:ring-primary;
   }
   
   /* Typing indicator style */
