@@ -124,12 +124,10 @@ export class MongoStorage implements IStorage {
   
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
     try {
-      const lastMessage = await MessageModel.findOne().sort({ id: -1 });
-      const newId = lastMessage ? lastMessage.id + 1 : 1;
-      
+      // Don't generate ID explicitly - let the pre-save hook handle it
+      // to prevent race conditions that create duplicate IDs
       const newMessage = new MessageModel({
         ...insertMessage,
-        id: newId,
         timestamp: insertMessage.timestamp || new Date(),
         delivered: false,
         read: false

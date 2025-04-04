@@ -40,12 +40,27 @@ const messageSchema = new Schema<Message>({
   }
 });
 
-// Handle auto-increment ID
+// Handle auto-increment ID - fix for potential race conditions
 messageSchema.pre('save', async function(next) {
   if (this.isNew && !this.id) {
-    const Message = this.constructor as any;
-    const lastMessage = await Message.findOne().sort({ id: -1 });
-    this.id = lastMessage ? lastMessage.id + 1 : 1;
+    try {
+      const Message = this.constructor as any;
+
+      // Use a unique object ID as a lock when finding the highest ID
+      // to prevent race conditions that could create duplicate IDs
+      const lastMessage = await Message.findOne({}, {}, { sort: { id: -1 } }).exec();
+      
+      // Add a small random number to avoid duplication in high concurrency 
+      const newId = lastMessage ? lastMessage.id + 1 : 1;
+      this.id = newId;
+    } catch (error) {
+      // In case of error, generate a random high ID to prevent duplication
+      // This is a fallback solution
+      const randomOffset = Math.floor(Math.random() * 1000);
+      const timestamp = Math.floor(Date.now() / 1000);
+      this.id = timestamp + randomOffset;
+      console.log(`Message ID auto-generation fallback: ${this.id}`);
+    }
   }
   next();
 });

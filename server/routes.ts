@@ -240,7 +240,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const undeliveredMessages = await storage.getUndeliveredMessages(userId);
           
           // Group by sender and notify each sender their messages were delivered
-          const senderIds = [...new Set(undeliveredMessages.map(msg => msg.senderId))];
+          const senderIdsSet = new Set(undeliveredMessages.map(msg => msg.senderId));
+          const senderIds = Array.from(senderIdsSet);
           
           for (const senderId of senderIds) {
             const senderSocketId = userSockets.get(senderId);
