@@ -325,13 +325,13 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
         </div>
         
         {/* Text Input - Facebook Messenger Style */}
-        <div className="flex-1 relative messenger-input">
+        <div className="w-full max-w-[calc(100%-5.5rem)] md:max-w-xl relative messenger-input">
           <div className="relative rounded-full overflow-hidden bg-zinc-800 dark:bg-zinc-800 border-0 focus-within:ring-1 focus-within:ring-messenger-yellow">
             <Textarea 
               ref={textareaRef}
               id="message-input"
               rows={1}
-              className="block w-full resize-none border-0 bg-transparent py-2 pl-4 pr-12 focus:outline-none min-h-[40px] max-h-[120px] text-base shadow-none" 
+              className="block w-full resize-none border-0 bg-transparent py-[10px] pl-4 pr-12 focus:outline-none min-h-[40px] max-h-[120px] text-base shadow-none text-white" 
               placeholder="Aa"
               value={messageText}
               onChange={handleTextChange}

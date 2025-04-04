@@ -114,10 +114,10 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
   // Text-only message
   if (message.content && !message.imagePath) {
     return (
-      <div className={`flex items-end group ${isCurrentUser ? "justify-end" : "justify-start"} mb-1 bubble-appear`}>
+      <div className={`flex items-end group ${isCurrentUser ? "justify-end" : "justify-start"} mb-[3px] bubble-appear`}>
         {!isCurrentUser && <MessageActions />}
-        <div className={`flex flex-col space-y-1 ${isCurrentUser ? "items-end" : "items-start"} max-w-[75%] sm:max-w-[65%] md:max-w-md`}>
-          <div className={`px-3 py-2 relative
+        <div className={`flex flex-col space-y-[2px] ${isCurrentUser ? "items-end" : "items-start"} max-w-[70%] sm:max-w-[65%] md:max-w-md`}>
+          <div className={`px-3 py-[6px] relative
             ${isCurrentUser 
               ? "messenger-bubble-sent rounded-t-[20px] rounded-bl-[20px] rounded-br-[4px]" 
               : "messenger-bubble-received rounded-t-[20px] rounded-br-[20px] rounded-bl-[4px]"
@@ -138,9 +138,9 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
   // Image-only or image-with-text message
   if (message.imagePath) {
     return (
-      <div className={`flex items-end group ${isCurrentUser ? "justify-end" : "justify-start"} mb-1 bubble-appear`}>
+      <div className={`flex items-end group ${isCurrentUser ? "justify-end" : "justify-start"} mb-[3px] bubble-appear`}>
         {!isCurrentUser && <MessageActions />}
-        <div className={`flex flex-col space-y-1 ${isCurrentUser ? "items-end" : "items-start"} max-w-[75%] sm:max-w-[65%] md:max-w-md`}>
+        <div className={`flex flex-col space-y-[2px] ${isCurrentUser ? "items-end" : "items-start"} max-w-[70%] sm:max-w-[65%] md:max-w-md`}>
           <div className={`overflow-hidden
             ${isCurrentUser 
               ? "messenger-bubble-sent rounded-t-[20px] rounded-bl-[20px] rounded-br-[4px]" 
@@ -150,7 +150,7 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
               <img 
                 src={message.imagePath} 
                 alt="Shared image" 
-                className={`w-full h-auto object-contain max-h-[300px]
+                className={`w-full h-auto object-contain max-h-[240px]
                   ${imageLoaded ? 'opacity-100' : 'opacity-0'} 
                   transition-opacity duration-200`}
                 onLoad={() => setImageLoaded(true)}
@@ -173,7 +173,7 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
             </div>
             
             {message.content && (
-              <div className={`p-3 ${isCurrentUser ? "text-black" : "text-white"}`}>
+              <div className={`p-2 ${isCurrentUser ? "text-black" : "text-white"}`}>
                 <p className="text-sm md:text-[15px] break-words whitespace-pre-wrap">{message.content}</p>
               </div>
             )}

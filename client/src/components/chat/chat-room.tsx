@@ -153,13 +153,13 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
         ) : (
           <>
             {Object.entries(groupedMessages).map(([date, msgs]) => (
-              <div key={date} className="mb-6">
-                <div className="text-center mb-6 sticky top-0 z-10">
+              <div key={date} className="mb-4">
+                <div className="text-center mb-4 sticky top-0 z-10">
                   <span className="text-xs bg-zinc-800 text-zinc-400 px-4 py-1.5 rounded-full shadow-sm">
                     {date}
                   </span>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {(msgs as MessageWithUser[]).map((message) => (
                     <ChatBubble
                       key={message.id}
