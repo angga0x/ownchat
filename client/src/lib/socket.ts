@@ -1,5 +1,6 @@
 import { queryClient } from "./queryClient";
 import { io, Socket } from "socket.io-client";
+import { addMessageToCache, updateMessageStatusInCache } from "./chatCache";
 
 let socket: Socket | null = null;
 
@@ -179,6 +180,14 @@ function handleIncomingMessage(message: any) {
   
   // Also invalidate to ensure we have the latest data
   queryClient.invalidateQueries({ queryKey });
+  
+  // Update the localStorage cache with the new message
+  // Cari user ID dari data yang tersimpan
+  const userQuery = queryClient.getQueryData<any>(["/api/user"]);
+  if (userQuery && userQuery.id) {
+    // Tambahkan pesan ke cache lokal
+    addMessageToCache(userQuery.id, message.senderId, message);
+  }
 }
 
 function handleUserStatusChange(userId: number, online: boolean) {
@@ -222,6 +231,9 @@ function updateMessageDeliveryStatus(messageId: number, status: 'delivered' | 'r
       }
     }
   });
+  
+  // Update message status in localStorage cache
+  updateMessageStatusInCache(messageId, status);
 }
 
 // Function to mark messages as read when a user views them

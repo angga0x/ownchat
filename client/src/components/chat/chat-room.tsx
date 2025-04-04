@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { User, MessageWithUser } from "@shared/schema";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ChatBubble from "./chat-bubble";
@@ -8,6 +7,7 @@ import { format } from "date-fns";
 import { Loader2, MessageCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { markMessagesAsRead, isUserTyping } from "@/lib/socket";
+import { useChatCache } from "@/hooks/use-chat-cache";
 
 interface ChatRoomProps {
   selectedUser: User | null;
@@ -20,30 +20,13 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   
-  // Fetch messages when a user is selected
-  const { data: messages = [], isLoading } = useQuery<MessageWithUser[]>({
-    queryKey: ["/api/messages", selectedUser?.id],
-    queryFn: async () => {
-      if (!selectedUser) return [];
-      
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token");
-      
-      const res = await fetch(`/api/messages/${selectedUser.id}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`
-        }
-      });
-      
-      if (!res.ok) {
-        throw new Error("Failed to fetch messages");
-      }
-      
-      return res.json();
-    },
-    // Only run query if a user is selected
-    enabled: !!selectedUser,
-  });
+  // Use chat cache hook untuk mendapatkan pesan baik dari cache lokal maupun server
+  const { 
+    messages = [], 
+    isLoading,
+    error, 
+    addMessage 
+  } = useChatCache(currentUser, selectedUser);
   
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -76,7 +59,7 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
   };
   
   // Group messages by date
-  const groupedMessages = messages.reduce((groups: any, message) => {
+  const groupedMessages = messages.reduce((groups: Record<string, MessageWithUser[]>, message: MessageWithUser) => {
     const date = format(new Date(message.timestamp), 'MMMM d, yyyy');
     if (!groups[date]) {
       groups[date] = [];

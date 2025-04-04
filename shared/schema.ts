@@ -51,7 +51,9 @@ export const messageWithUser = z.object({
   receiverId: z.number(),
   content: z.string().nullable(),
   imagePath: z.string().nullable(),
-  timestamp: z.date(),
+  timestamp: z.union([z.date(), z.string()]).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
   delivered: z.boolean().default(false),
   read: z.boolean().default(false),
   senderUsername: z.string(),

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { User } from "@shared/schema";
+import { User, MessageWithUser } from "@shared/schema";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +8,8 @@ import { Image, Loader2, Send, X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/hooks/use-auth";
+import { addMessageToCache } from "@/lib/chatCache";
 
 interface MessageInputProps {
   selectedUser: User;
@@ -22,6 +24,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isMobile = useIsMobile();
   const { toast } = useToast();
+  const { user: currentUser } = useAuth();
   
   // Reset state when selected user changes
   useEffect(() => {
@@ -140,7 +143,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
         }
         
         // Upload image
-        const response = await fetch("/api/upload", {
+        const uploadResponse = await fetch("/api/upload", {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`
@@ -148,17 +151,38 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
           body: formData,
         });
         
-        if (!response.ok) {
+        if (!uploadResponse.ok) {
           throw new Error("Failed to upload image");
         }
         
-        const data = await response.json();
+        const data = await uploadResponse.json();
         
         // Send image message
         await apiRequest("POST", "/api/messages/image", {
           receiverId: selectedUser.id,
           imagePath: data.imagePath
         });
+        
+        // Create optimistic image message for local caching
+        if (currentUser) {
+          // Buat optimistic message untuk cache lokal
+          const tempId = Date.now();
+          const imageMessage: MessageWithUser = {
+            id: tempId,
+            senderId: currentUser.id,
+            senderUsername: currentUser.username,
+            receiverId: selectedUser.id,
+            content: null,
+            imagePath: data.imagePath,
+            timestamp: new Date(),
+            delivered: false,
+            read: false,
+            isCurrentUser: true
+          };
+          
+          // Tambahkan ke cache lokal
+          addMessageToCache(currentUser.id, selectedUser.id, imageMessage);
+        }
         
         // Clear image preview after upload
         removePreviewImage();
@@ -171,6 +195,28 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
           throw new Error("Socket.IO connection not open");
         }
         
+        // Create optimistic message for local caching
+        if (currentUser) {
+          // Optimistic message untuk ditambahkan ke cache
+          const tempId = Date.now(); // Temporary ID sampai server mengirim ID sebenarnya
+          const optimisticMessage: MessageWithUser = {
+            id: tempId,
+            senderId: currentUser.id,
+            senderUsername: currentUser.username,
+            receiverId: selectedUser.id,
+            content: messageText,
+            imagePath: null,
+            timestamp: new Date(),
+            delivered: false,
+            read: false,
+            isCurrentUser: true
+          };
+          
+          // Tambahkan ke cache lokal
+          addMessageToCache(currentUser.id, selectedUser.id, optimisticMessage);
+        }
+        
+        // Kirim pesan melalui socket
         sendMessage(selectedUser.id, messageText);
         setMessageText("");
         

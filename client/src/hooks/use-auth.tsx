@@ -8,6 +8,7 @@ import { User as SelectUser } from "@shared/schema";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { setupSocket, disconnectSocket } from "@/lib/socket";
+import { clearAllChatCaches } from "@/lib/chatCache";
 
 type AuthContextType = {
   user: SelectUser | null;
@@ -150,6 +151,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("token");
       queryClient.setQueryData(["/api/user"], null);
       
+      // Clear all chat message caches
+      clearAllChatCaches();
+      
       toast({
         title: "Logged out",
         description: "You have been logged out successfully.",
@@ -180,7 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user,
+        user: user || null,
         isLoading,
         error,
         loginMutation,
