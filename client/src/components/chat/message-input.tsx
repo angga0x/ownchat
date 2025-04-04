@@ -251,7 +251,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
   return (
     <div className="bg-background border-t border-border p-3 sm:p-4 theme-transition">
       <div className="flex items-end space-x-2">
-        {/* Image Upload */}
+        {/* Image Upload - Facebook Messenger Style */}
         <div className="relative flex-shrink-0">
           <input 
             type="file" 
@@ -264,31 +264,42 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
           <label 
             htmlFor="image-upload" 
             className={`flex items-center justify-center w-10 h-10 rounded-full cursor-pointer transition-colors duration-200
-              ${isUploading ? 'bg-muted cursor-not-allowed' : 'bg-muted/50 hover:bg-muted text-muted-foreground'}`}
+              ${isUploading ? 'cursor-not-allowed text-muted-foreground' : 'text-messenger-blue hover:bg-muted/50'}`}
             aria-label="Attach image"
           >
             {isUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Image className="h-5 w-5" />}
           </label>
         </div>
         
-        {/* Text Input */}
+        {/* Text Input - Facebook Messenger Style */}
         <div className="flex-1 relative">
-          <Textarea 
-            ref={textareaRef}
-            id="message-input"
-            rows={1}
-            className="block w-full resize-none rounded-lg border-border py-2 pl-3 pr-10 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary min-h-[36px] max-h-[120px] text-base" 
-            placeholder="Type a message..."
-            value={messageText}
-            onChange={handleTextChange}
-            onKeyPress={handleKeyPress}
-            disabled={isUploading}
-            style={{ height: '36px' }}
-          />
+          <div className="relative rounded-full overflow-hidden bg-muted/50 dark:bg-muted/30 border-0 focus-within:ring-1 focus-within:ring-messenger-blue focus-within:bg-background">
+            <Textarea 
+              ref={textareaRef}
+              id="message-input"
+              rows={1}
+              className="block w-full resize-none border-0 bg-transparent py-2 pl-4 pr-12 focus:outline-none min-h-[40px] max-h-[120px] text-base shadow-none" 
+              placeholder="Aa"
+              value={messageText}
+              onChange={handleTextChange}
+              onKeyPress={handleKeyPress}
+              disabled={isUploading}
+              style={{ height: '40px' }}
+            />
+            
+            {/* Emoji button placeholder - for visual authenticity */}
+            <div className="absolute right-3 bottom-2">
+              <div className="text-messenger-blue cursor-pointer">
+                <svg viewBox="0 0 16 16" height="20" width="20" className="fill-current">
+                  <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16zM7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zM8.45 4h-.9a.45.45 0 0 0-.45.45v.9c0 .248.203.45.45.45h.9a.45.45 0 0 0 .45-.45v-.9a.45.45 0 0 0-.45-.45zm2.5 1c-.552 0-1 .672-1 1.5S10.448 8 11 8s1-.672 1-1.5S11.552 5 11 5zM7.243 9.857a.5.5 0 0 0-.742.146.5.5 0 0 0 .72.678c.49-.521 1.335-.851 2.28-.848.942.005 1.792.356 2.29.91a.5.5 0 0 0 .737-.166.5.5 0 0 0-.171-.707c-.687-.443-1.635-.845-2.86-.852-1.131-.008-2.177.355-2.854.839z" />
+                </svg>
+              </div>
+            </div>
+          </div>
           
-          {/* Image Preview */}
+          {/* Image Preview - Updated for Messenger Style */}
           {imagePreviewUrl && (
-            <div className="absolute bottom-full left-0 mb-2 w-48 h-48 bg-background border border-border rounded-md overflow-hidden shadow-lg">
+            <div className="absolute bottom-full left-0 mb-2 w-52 h-52 bg-background rounded-lg overflow-hidden shadow-lg border border-border">
               <div className="relative w-full h-full">
                 <img 
                   className="w-full h-full object-cover" 
@@ -297,7 +308,7 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
                 />
                 <button 
                   type="button" 
-                  className="absolute top-1 right-1 bg-background/80 text-foreground rounded-full p-1 hover:bg-background/95 transition-opacity"
+                  className="absolute top-2 right-2 bg-background/80 text-foreground rounded-full p-1.5 hover:bg-background transition-colors"
                   onClick={removePreviewImage}
                   aria-label="Remove image"
                 >
@@ -308,17 +319,18 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
           )}
         </div>
         
-        {/* Send Button */}
+        {/* Send Button - Facebook Messenger Style */}
         <Button 
-          className={`flex items-center justify-center w-10 h-10 rounded-full p-0 flex-shrink-0 transition-all duration-200 messenger-gradient
+          className={`flex items-center justify-center w-10 h-10 rounded-full p-0 flex-shrink-0 transition-all duration-200
             ${(!messageText.trim() && !imageFile) || isUploading 
-              ? 'opacity-50 cursor-not-allowed' 
-              : 'opacity-100 hover:scale-105 messenger-gradient-hover'}`}
+              ? 'bg-transparent text-muted-foreground cursor-not-allowed' 
+              : 'text-messenger-blue hover:bg-muted/50'}`}
           onClick={handleSendMessage}
           disabled={(!messageText.trim() && !imageFile) || isUploading}
+          variant="ghost"
           aria-label="Send message"
         >
-          <Send className="h-5 w-5" />
+          <Send className="h-5 w-5 rotate-45" />
         </Button>
       </div>
     </div>

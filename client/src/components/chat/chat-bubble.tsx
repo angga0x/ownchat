@@ -12,37 +12,44 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   
+  // Facebook Messenger style read/delivered indicators
+  const ReadIndicator = () => (
+    <span className="text-[10px] leading-none flex items-center">
+      {message.read ? (
+        // Blue filled circle for read (Messenger style)
+        <svg width="14" height="14" viewBox="0 0 16 16" className="text-messenger-blue" fill="currentColor">
+          <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16zM5 7.8l2 2.2 4-4.2 1 1L7 12 4 9l1-1.2z"/>
+        </svg>
+      ) : message.delivered ? (
+        // Gray filled circle for delivered
+        <svg width="14" height="14" viewBox="0 0 16 16" className="text-muted-foreground" fill="currentColor">
+          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3-5.5l-8 8-2-2L4 10l2 2 9-9-2-1.5z"/>
+        </svg>
+      ) : (
+        // Clock icon for sent but not delivered
+        <svg width="14" height="14" viewBox="0 0 24 24" className="text-muted-foreground/60" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 6v6l4 2" />
+        </svg>
+      )}
+    </span>
+  );
+  
   // Text-only message
   if (message.content && !message.imagePath) {
     return (
-      <div className={`flex items-end ${isCurrentUser ? "justify-end" : "justify-start"} mb-2 md:mb-3 bubble-appear`}>
+      <div className={`flex items-end ${isCurrentUser ? "justify-end" : "justify-start"} mb-1.5 md:mb-2 bubble-appear`}>
         <div className={`flex flex-col space-y-1 ${isCurrentUser ? "items-end" : "items-start"} max-w-[75%] sm:max-w-[65%] md:max-w-xs`}>
-          <div className={`px-3 py-2 rounded-2xl
+          <div className={`px-3 py-2 
             ${isCurrentUser 
-              ? "rounded-br-none my-message-bubble shadow-sm" 
-              : "rounded-bl-none their-message-bubble shadow-sm border border-border"
+              ? "messenger-bubble-sent rounded-t-[20px] rounded-bl-[20px] rounded-br-[4px]" 
+              : "messenger-bubble-received rounded-t-[20px] rounded-br-[20px] rounded-bl-[4px]"
             }`}>
-            <p className="text-sm break-words whitespace-pre-wrap">{message.content}</p>
+            <p className={`text-sm break-words whitespace-pre-wrap ${isCurrentUser ? "text-white" : "text-foreground"}`}>{message.content}</p>
           </div>
           <div className="flex items-center px-1 space-x-1">
             <span className="text-[10px] text-muted-foreground leading-none">{formattedTime}</span>
-            {isCurrentUser && (
-              <span className="text-[10px] text-muted-foreground leading-none flex items-center">
-                {message.read ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9.707 14.707a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L9 12.586l7.293-7.293a1 1 0 011.414 1.414l-8 8z" />
-                  </svg>
-                ) : message.delivered ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-muted-foreground" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9.707 14.707a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L9 12.586l7.293-7.293a1 1 0 011.414 1.414l-8 8z" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-muted-foreground/50" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                  </svg>
-                )}
-              </span>
-            )}
+            {isCurrentUser && <ReadIndicator />}
           </div>
         </div>
       </div>
@@ -52,18 +59,18 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
   // Image-only or image-with-text message
   if (message.imagePath) {
     return (
-      <div className={`flex items-end ${isCurrentUser ? "justify-end" : "justify-start"} mb-2 md:mb-3 bubble-appear`}>
+      <div className={`flex items-end ${isCurrentUser ? "justify-end" : "justify-start"} mb-1.5 md:mb-2 bubble-appear`}>
         <div className={`flex flex-col space-y-1 ${isCurrentUser ? "items-end" : "items-start"} max-w-[75%] sm:max-w-[65%] md:max-w-xs`}>
-          <div className={`rounded-2xl overflow-hidden
+          <div className={`overflow-hidden
             ${isCurrentUser 
-              ? "rounded-br-none my-message-bubble shadow-sm" 
-              : "rounded-bl-none their-message-bubble shadow-sm border border-border"
+              ? "messenger-bubble-sent rounded-t-[20px] rounded-bl-[20px] rounded-br-[4px]" 
+              : "messenger-bubble-received rounded-t-[20px] rounded-br-[20px] rounded-bl-[4px]"
             }`}>
             <div className={`relative ${!imageLoaded && !imageError ? 'bg-muted animate-pulse' : ''}`}>
               <img 
                 src={message.imagePath} 
                 alt="Shared image" 
-                className={`w-full h-auto object-contain rounded-t-2xl max-h-[300px]
+                className={`w-full h-auto object-contain max-h-[300px]
                   ${imageLoaded ? 'opacity-100' : 'opacity-0'} 
                   transition-opacity duration-200`}
                 onLoad={() => setImageLoaded(true)}
@@ -93,23 +100,7 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
           </div>
           <div className="flex items-center px-1 space-x-1">
             <span className="text-[10px] text-muted-foreground leading-none">{formattedTime}</span>
-            {isCurrentUser && (
-              <span className="text-[10px] text-muted-foreground leading-none flex items-center">
-                {message.read ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9.707 14.707a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L9 12.586l7.293-7.293a1 1 0 011.414 1.414l-8 8z" />
-                  </svg>
-                ) : message.delivered ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-muted-foreground" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9.707 14.707a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L9 12.586l7.293-7.293a1 1 0 011.414 1.414l-8 8z" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-muted-foreground/50" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                  </svg>
-                )}
-              </span>
-            )}
+            {isCurrentUser && <ReadIndicator />}
           </div>
         </div>
       </div>

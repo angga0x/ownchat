@@ -139,15 +139,21 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
                 </div>
               </div>
             ))}
-            {/* Typing indicator */}
+            {/* Typing indicator - Facebook Messenger Style */}
             {selectedUser && isUserTyping(selectedUser.id) && (
-              <div className="flex items-center space-x-2 mt-2 ml-4 mb-1 animate-pulse transition-opacity">
-                <div className="flex">
-                  <span className="w-2 h-2 bg-muted-foreground/70 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                  <span className="w-2 h-2 mx-1 bg-muted-foreground/70 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                  <span className="w-2 h-2 bg-muted-foreground/70 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+              <div className={`flex items-end mb-1.5 md:mb-2 ml-4 bubble-appear`}>
+                <div className="flex flex-col space-y-1 items-start">
+                  <div className="px-3 py-2 messenger-bubble-received rounded-t-[20px] rounded-br-[20px] rounded-bl-[4px] flex items-center">
+                    <div className="messenger-typing-indicator">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </div>
+                  <div className="flex items-center px-1 space-x-1">
+                    <span className="text-[10px] text-muted-foreground leading-none">@{selectedUser.username} is typing...</span>
+                  </div>
                 </div>
-                <span className="text-xs text-muted-foreground">@{selectedUser.username} is typing...</span>
               </div>
             )}
             <div ref={messagesEndRef} className="h-4" />
