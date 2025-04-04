@@ -20,6 +20,14 @@ const userSchema = new Schema<User>({
   online: { 
     type: Boolean, 
     default: false 
+  },
+  pinnedChats: {
+    type: [Number], 
+    default: []
+  },
+  archivedChats: {
+    type: [Number], 
+    default: []
   }
 }, { 
   timestamps: true 

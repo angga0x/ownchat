@@ -17,12 +17,20 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   setUserOnlineStatus(id: number, status: boolean): Promise<void>;
   
+  // Chat management methods
+  pinChat(userId: number, chatPartnerId: number): Promise<User>;
+  unpinChat(userId: number, chatPartnerId: number): Promise<User>;
+  archiveChat(userId: number, chatPartnerId: number): Promise<User>;
+  unarchiveChat(userId: number, chatPartnerId: number): Promise<User>;
+  
   // Message methods
   getMessages(senderId: number, receiverId: number): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   markMessagesAsDelivered(receiverId: number): Promise<number>;
   markMessagesAsRead(senderId: number, receiverId: number): Promise<number>;
   getUndeliveredMessages(receiverId: number): Promise<Message[]>;
+  deleteMessageForMe(messageId: number, userId: string): Promise<Message>;
+  deleteMessageForAll(messageId: number): Promise<Message>;
   
   // Session store
   sessionStore: any; // Using any type to avoid session.SessionStore issue
@@ -42,6 +50,141 @@ export class MongoStorage implements IStorage {
     const uploadsDir = path.join(process.cwd(), 'server', 'uploads');
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+  }
+  
+  // Chat management methods
+  async pinChat(userId: number, chatPartnerId: number): Promise<User> {
+    try {
+      const user = await UserModel.findOne({ id: userId });
+      if (!user) throw new Error('User not found');
+      
+      // Initialize pinnedChats if null
+      if (!user.pinnedChats) {
+        user.pinnedChats = [];
+      }
+      
+      // Add to pinned chats if not already there
+      if (!user.pinnedChats.includes(chatPartnerId)) {
+        user.pinnedChats.push(chatPartnerId);
+        await user.save();
+      }
+      
+      return user.toObject();
+    } catch (error) {
+      log(`Error pinning chat: ${error}`, 'mongodb');
+      throw error;
+    }
+  }
+  
+  async unpinChat(userId: number, chatPartnerId: number): Promise<User> {
+    try {
+      const user = await UserModel.findOne({ id: userId });
+      if (!user) throw new Error('User not found');
+      
+      // Initialize pinnedChats if null
+      if (!user.pinnedChats) {
+        user.pinnedChats = [];
+        return user.toObject();
+      }
+      
+      // Remove from pinned chats
+      user.pinnedChats = user.pinnedChats.filter(id => id !== chatPartnerId);
+      await user.save();
+      
+      return user.toObject();
+    } catch (error) {
+      log(`Error unpinning chat: ${error}`, 'mongodb');
+      throw error;
+    }
+  }
+  
+  async archiveChat(userId: number, chatPartnerId: number): Promise<User> {
+    try {
+      const user = await UserModel.findOne({ id: userId });
+      if (!user) throw new Error('User not found');
+      
+      // Initialize archivedChats if null
+      if (!user.archivedChats) {
+        user.archivedChats = [];
+      }
+      
+      // Add to archived chats if not already there
+      if (!user.archivedChats.includes(chatPartnerId)) {
+        user.archivedChats.push(chatPartnerId);
+        await user.save();
+      }
+      
+      return user.toObject();
+    } catch (error) {
+      log(`Error archiving chat: ${error}`, 'mongodb');
+      throw error;
+    }
+  }
+  
+  async unarchiveChat(userId: number, chatPartnerId: number): Promise<User> {
+    try {
+      const user = await UserModel.findOne({ id: userId });
+      if (!user) throw new Error('User not found');
+      
+      // Initialize archivedChats if null
+      if (!user.archivedChats) {
+        user.archivedChats = [];
+        return user.toObject();
+      }
+      
+      // Remove from archived chats
+      user.archivedChats = user.archivedChats.filter(id => id !== chatPartnerId);
+      await user.save();
+      
+      return user.toObject();
+    } catch (error) {
+      log(`Error unarchiving chat: ${error}`, 'mongodb');
+      throw error;
+    }
+  }
+  
+  async deleteMessageForMe(messageId: number, userId: string): Promise<Message> {
+    try {
+      const message = await MessageModel.findOne({ id: messageId });
+      if (!message) throw new Error('Message not found');
+      
+      // Initialize deletedBy if null
+      if (!message.deletedBy) {
+        message.deletedBy = [];
+      }
+      
+      // Add userId to deletedBy array if not already there
+      if (!message.deletedBy.includes(userId)) {
+        message.deletedBy.push(userId);
+        await message.save();
+      }
+      
+      return message.toObject();
+    } catch (error) {
+      log(`Error deleting message for user: ${error}`, 'mongodb');
+      throw error;
+    }
+  }
+  
+  async deleteMessageForAll(messageId: number): Promise<Message> {
+    try {
+      const message = await MessageModel.findOne({ id: messageId });
+      if (!message) throw new Error('Message not found');
+      
+      message.isDeleted = true;
+      
+      // Initialize deletedBy if null
+      if (!message.deletedBy) {
+        message.deletedBy = [];
+      }
+      
+      await message.save();
+      
+      return message.toObject();
+    } catch (error) {
+      log(`Error deleting message for all: ${error}`, 'mongodb');
+      throw error;
     }
   }
   
@@ -205,6 +348,99 @@ export class MemStorage implements IStorage {
   sessionStore: any; // Using any type to avoid session.SessionStore issue
   currentUserId: number;
   currentMessageId: number;
+  
+  // Chat management methods
+  async pinChat(userId: number, chatPartnerId: number): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error('User not found');
+    
+    if (!user.pinnedChats) {
+      user.pinnedChats = [];
+    }
+    
+    if (!user.pinnedChats.includes(chatPartnerId)) {
+      user.pinnedChats.push(chatPartnerId);
+    }
+    
+    this.users.set(userId, user);
+    return user;
+  }
+  
+  async unpinChat(userId: number, chatPartnerId: number): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error('User not found');
+    
+    if (!user.pinnedChats) {
+      user.pinnedChats = [];
+      this.users.set(userId, user);
+      return user;
+    }
+    
+    user.pinnedChats = user.pinnedChats.filter(id => id !== chatPartnerId);
+    this.users.set(userId, user);
+    return user;
+  }
+  
+  async archiveChat(userId: number, chatPartnerId: number): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error('User not found');
+    
+    if (!user.archivedChats) {
+      user.archivedChats = [];
+    }
+    
+    if (!user.archivedChats.includes(chatPartnerId)) {
+      user.archivedChats.push(chatPartnerId);
+    }
+    
+    this.users.set(userId, user);
+    return user;
+  }
+  
+  async unarchiveChat(userId: number, chatPartnerId: number): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error('User not found');
+    
+    if (!user.archivedChats) {
+      user.archivedChats = [];
+      this.users.set(userId, user);
+      return user;
+    }
+    
+    user.archivedChats = user.archivedChats.filter(id => id !== chatPartnerId);
+    this.users.set(userId, user);
+    return user;
+  }
+  
+  async deleteMessageForMe(messageId: number, userId: string): Promise<Message> {
+    const message = this.messages.get(messageId);
+    if (!message) throw new Error('Message not found');
+    
+    if (!message.deletedBy) {
+      message.deletedBy = [];
+    }
+    
+    if (!message.deletedBy.includes(userId)) {
+      message.deletedBy.push(userId);
+    }
+    
+    this.messages.set(messageId, message);
+    return message;
+  }
+  
+  async deleteMessageForAll(messageId: number): Promise<Message> {
+    const message = this.messages.get(messageId);
+    if (!message) throw new Error('Message not found');
+    
+    message.isDeleted = true;
+    
+    if (!message.deletedBy) {
+      message.deletedBy = [];
+    }
+    
+    this.messages.set(messageId, message);
+    return message;
+  }
 
   constructor() {
     this.users = new Map();
@@ -237,7 +473,13 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { ...insertUser, id, online: false };
+    const user: User = { 
+      ...insertUser, 
+      id, 
+      online: false,
+      pinnedChats: [],
+      archivedChats: []
+    };
     this.users.set(id, user);
     return user;
   }
@@ -272,7 +514,9 @@ export class MemStorage implements IStorage {
       imagePath: insertMessage.imagePath || null,
       timestamp: insertMessage.timestamp || new Date(),
       delivered: false,
-      read: false
+      read: false,
+      isDeleted: false,
+      deletedBy: []
     };
     this.messages.set(id, message);
     return message;

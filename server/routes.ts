@@ -60,6 +60,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Socket connection user mapping
   const userSockets = new Map<number, string>(); // userId -> socketId
   
+  // Join user to a room based on their ID
+  function joinUserRoom(socket: any, userId: number) {
+    socket.join(`user_${userId}`);
+  }
+  
   // Socket.IO connection handler
   io.on("connection", (socket) => {
     console.log(`New socket connection: ${socket.id}`);
@@ -77,6 +82,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         userId = user.id;
         userSockets.set(userId, socket.id);
+        
+        // Join user room for direct messaging
+        joinUserRoom(socket, userId);
         
         // Set user online
         await storage.setUserOnlineStatus(userId, true);
@@ -482,6 +490,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Send image message error:", error);
       res.status(500).json({ message: "Server error sending image message" });
+    }
+  });
+  
+  // Message management endpoints
+  
+  // Delete message for me
+  app.delete("/api/messages/:messageId/for-me", authenticateJWT, async (req: any, res: Response) => {
+    try {
+      const messageId = parseInt(req.params.messageId);
+      const userId = req.user.id.toString();
+      
+      const message = await storage.deleteMessageForMe(messageId, userId);
+      
+      // Notify other user that message has been deleted for this user
+      io.to(`user_${req.user.id}`).emit('message_deleted_for_me', { 
+        messageId, 
+        userId 
+      });
+      
+      res.status(200).json(message);
+    } catch (error) {
+      console.error(`Error deleting message for user: ${error}`);
+      res.status(500).json({ message: "Failed to delete message" });
+    }
+  });
+  
+  // Delete message for all
+  app.delete("/api/messages/:messageId/for-all", authenticateJWT, async (req: any, res: Response) => {
+    try {
+      const messageId = parseInt(req.params.messageId);
+      
+      // Get message first to check if user is the sender
+      const getMessage = await storage.getMessages(req.user.id, 0);
+      const message = getMessage.find(m => m.id === messageId);
+      
+      if (!message) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+      
+      // Only message sender can delete for all
+      if (message.senderId !== req.user.id) {
+        return res.status(403).json({ message: "You can only delete your own messages for all users" });
+      }
+      
+      const updatedMessage = await storage.deleteMessageForAll(messageId);
+      
+      // Notify all relevant users that message has been deleted
+      if (message.senderId && message.receiverId) {
+        const senderSocketId = userSockets.get(message.senderId);
+        const receiverSocketId = userSockets.get(message.receiverId);
+        
+        if (senderSocketId) {
+          const senderSocket = io.sockets.sockets.get(senderSocketId);
+          if (senderSocket) {
+            senderSocket.emit('message_deleted_for_all', { messageId });
+          }
+        }
+        
+        if (receiverSocketId) {
+          const receiverSocket = io.sockets.sockets.get(receiverSocketId);
+          if (receiverSocket) {
+            receiverSocket.emit('message_deleted_for_all', { messageId });
+          }
+        }
+      }
+      
+      res.status(200).json(updatedMessage);
+    } catch (error) {
+      console.error(`Error deleting message for all: ${error}`);
+      res.status(500).json({ message: "Failed to delete message for all" });
+    }
+  });
+  
+  // Chat management endpoints
+  
+  // Pin chat
+  app.post("/api/chats/:partnerId/pin", authenticateJWT, async (req: any, res: Response) => {
+    try {
+      const partnerId = parseInt(req.params.partnerId);
+      const userId = req.user.id;
+      
+      const user = await storage.pinChat(userId, partnerId);
+      
+      res.status(200).json({ pinnedChats: user.pinnedChats });
+    } catch (error) {
+      console.error(`Error pinning chat: ${error}`);
+      res.status(500).json({ message: "Failed to pin chat" });
+    }
+  });
+  
+  // Unpin chat
+  app.post("/api/chats/:partnerId/unpin", authenticateJWT, async (req: any, res: Response) => {
+    try {
+      const partnerId = parseInt(req.params.partnerId);
+      const userId = req.user.id;
+      
+      const user = await storage.unpinChat(userId, partnerId);
+      
+      res.status(200).json({ pinnedChats: user.pinnedChats });
+    } catch (error) {
+      console.error(`Error unpinning chat: ${error}`);
+      res.status(500).json({ message: "Failed to unpin chat" });
+    }
+  });
+  
+  // Archive chat
+  app.post("/api/chats/:partnerId/archive", authenticateJWT, async (req: any, res: Response) => {
+    try {
+      const partnerId = parseInt(req.params.partnerId);
+      const userId = req.user.id;
+      
+      const user = await storage.archiveChat(userId, partnerId);
+      
+      res.status(200).json({ archivedChats: user.archivedChats });
+    } catch (error) {
+      console.error(`Error archiving chat: ${error}`);
+      res.status(500).json({ message: "Failed to archive chat" });
+    }
+  });
+  
+  // Unarchive chat
+  app.post("/api/chats/:partnerId/unarchive", authenticateJWT, async (req: any, res: Response) => {
+    try {
+      const partnerId = parseInt(req.params.partnerId);
+      const userId = req.user.id;
+      
+      const user = await storage.unarchiveChat(userId, partnerId);
+      
+      res.status(200).json({ archivedChats: user.archivedChats });
+    } catch (error) {
+      console.error(`Error unarchiving chat: ${error}`);
+      res.status(500).json({ message: "Failed to unarchive chat" });
     }
   });
   

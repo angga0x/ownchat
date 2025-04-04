@@ -7,6 +7,8 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   online: boolean("online").default(false),
+  pinnedChats: integer("pinned_chats").array().default([]),
+  archivedChats: integer("archived_chats").array().default([]),
 });
 
 export const messages = pgTable("messages", {
@@ -18,6 +20,8 @@ export const messages = pgTable("messages", {
   timestamp: timestamp("timestamp").defaultNow().notNull(),
   delivered: boolean("delivered").default(false),
   read: boolean("read").default(false),
+  isDeleted: boolean("is_deleted").default(false),
+  deletedBy: text("deleted_by").array().default([]),
 });
 
 // User schemas
@@ -56,6 +60,8 @@ export const messageWithUser = z.object({
   ),
   delivered: z.boolean().default(false),
   read: z.boolean().default(false),
+  isDeleted: z.boolean().default(false),
+  deletedBy: z.array(z.string()).optional().default([]),
   senderUsername: z.string(),
   isCurrentUser: z.boolean(),
 });

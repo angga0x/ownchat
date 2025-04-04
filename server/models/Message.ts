@@ -37,6 +37,14 @@ const messageSchema = new Schema<Message>({
   read: {
     type: Boolean,
     default: false
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
+  deletedBy: {
+    type: [String],
+    default: []
   }
 });
 

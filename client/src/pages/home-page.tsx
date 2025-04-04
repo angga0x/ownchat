@@ -7,7 +7,7 @@ import ChatRoom from "@/components/chat/chat-room";
 import { ArrowLeft, LogOut, Users, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ThemeToggle, ThemeManager } from "@/components/ui/theme-toggle";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function HomePage() {
@@ -90,18 +90,20 @@ export default function HomePage() {
   
   return (
     <div className="h-screen flex flex-col bg-background theme-transition">
-      {/* Header */}
-      <header className="bg-background border-b border-border py-3 px-4 sm:px-6 flex items-center justify-between shadow-sm z-10 theme-transition">
+      {/* Header - Facebook Messenger Style */}
+      <header className="bg-white dark:bg-[#1e1e1e] border-b border-gray-200 dark:border-zinc-800 py-3 px-4 sm:px-6 flex items-center justify-between shadow-sm z-10 theme-transition">
         <div className="flex items-center">
           {isMobile && selectedUser && !showUserList ? (
-            <Button variant="ghost" size="icon" onClick={handleBackToUserList} className="mr-2">
+            <Button variant="ghost" size="icon" onClick={handleBackToUserList} className="mr-2 text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-700 dark:hover:text-zinc-200">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           ) : (
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-foreground bg-clip-text bg-gradient-to-r from-primary to-primary/80">TeleChat</h1>
+              <h1 className="text-xl font-extrabold bg-gradient-to-r from-primary to-blue-400 text-transparent bg-clip-text">
+                TeleChat
+              </h1>
               {isMobile && (
-                <Button variant="ghost" size="icon" onClick={() => setShowUserList(!showUserList)} className="ml-2">
+                <Button variant="ghost" size="icon" onClick={() => setShowUserList(!showUserList)} className="ml-2 text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-700 dark:hover:text-zinc-200">
                   <Users className="h-5 w-5" />
                 </Button>
               )}
@@ -109,40 +111,48 @@ export default function HomePage() {
           )}
         </div>
         {(!isMobile || (isMobile && !selectedUser)) && (
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
             <div className="flex items-center">
-              <Avatar className="h-8 w-8 border border-border">
-                <AvatarFallback className="bg-primary/10 text-primary">
+              <Avatar className="h-9 w-9 border border-gray-200 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800">
+                <AvatarFallback className="bg-gray-100 dark:bg-zinc-800 text-messenger-blue font-medium">
                   {getInitials(user?.username || '')}
                 </AvatarFallback>
               </Avatar>
               <div className="ml-2 hidden sm:block">
-                <p className="text-sm font-medium text-foreground">@{user?.username}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.username}</p>
                 <div className="flex items-center">
                   <span className="bg-green-500 rounded-full h-2 w-2 mr-1.5"></span>
-                  <span className="text-xs text-muted-foreground">Online</span>
+                  <span className="text-xs text-gray-500 dark:text-zinc-400">Active now</span>
                 </div>
               </div>
               <span className="ml-2 bg-green-500 rounded-full h-2 w-2 sm:hidden"></span>
             </div>
             <ThemeToggle />
-            <Button variant="ghost" size="icon" onClick={handleLogout} disabled={logoutMutation.isPending}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleLogout} 
+              disabled={logoutMutation.isPending}
+              className="rounded-full w-9 h-9 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-500 dark:text-zinc-400"
+            >
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
         )}
         {isMobile && selectedUser && !showUserList && (
-          <div className="flex items-center space-x-3">
-            <Avatar className="h-8 w-8 border border-border">
-              <AvatarFallback className="bg-primary/10 text-primary">
-                {getInitials(selectedUser.username)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="ml-1">
-              <p className="text-sm font-medium text-foreground">@{selectedUser.username}</p>
-              <div className="flex items-center">
-                <span className={`${selectedUser.online ? "bg-green-500" : "bg-muted"} rounded-full h-2 w-2 mr-1.5`}></span>
-                <span className="text-xs text-muted-foreground">{selectedUser.online ? 'Online' : 'Offline'}</span>
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center">
+              <Avatar className="h-9 w-9 border border-gray-200 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800">
+                <AvatarFallback className="bg-gray-100 dark:bg-zinc-800 text-messenger-blue font-medium">
+                  {getInitials(selectedUser.username)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="ml-2">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedUser.username}</p>
+                <div className="flex items-center">
+                  <span className={`${selectedUser.online ? "bg-green-500" : "bg-gray-400 dark:bg-zinc-500"} rounded-full h-2 w-2 mr-1.5`}></span>
+                  <span className="text-xs text-gray-500 dark:text-zinc-400">{selectedUser.online ? 'Active now' : 'Offline'}</span>
+                </div>
               </div>
             </div>
             <ThemeToggle />
@@ -155,7 +165,7 @@ export default function HomePage() {
         {/* User List */}
         <div className={`${isMobile ? 'absolute inset-0 z-20 transition-transform duration-300 transform' : 'relative'} 
           ${(isMobile && !showUserList) ? '-translate-x-full' : 'translate-x-0'} 
-          ${!isMobile ? 'w-full md:w-80 flex-shrink-0' : 'w-full'}`}>
+          ${!isMobile ? 'w-full md:w-72 lg:w-80 flex-shrink-0 border-r border-gray-200 dark:border-zinc-800' : 'w-full'}`}>
           <UserList 
             users={filteredUsers} 
             isLoading={isLoadingUsers}
@@ -168,7 +178,7 @@ export default function HomePage() {
         {/* Chat Area */}
         <div className={`${isMobile ? 'absolute inset-0 z-10 transition-transform duration-300 transform' : 'relative'} 
           ${(isMobile && showUserList) ? 'translate-x-full' : 'translate-x-0'} 
-          ${!isMobile ? 'flex-1' : 'w-full'}`}>
+          ${!isMobile ? 'flex-1 mx-auto w-full max-w-screen-xl' : 'w-full'}`}>
           <ChatRoom 
             selectedUser={selectedUser}
             currentUser={user}
