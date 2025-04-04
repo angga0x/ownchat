@@ -88,53 +88,55 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
       {/* Chat Header - Facebook Messenger Style */}
       {!isMobile && (
         <div className="bg-[#1e1e1e] dark:bg-[#1e1e1e] border-b border-zinc-800 p-4 flex items-center justify-between shadow-sm messenger-header">
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <div className={`w-10 h-10 ${getUserColor(selectedUser.username)} rounded-full flex items-center justify-center text-white font-medium shadow-sm`}>
-                <span>{getInitials(selectedUser.username)}</span>
+          <div className="max-w-4xl w-full mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <div className={`w-10 h-10 ${getUserColor(selectedUser.username)} rounded-full flex items-center justify-center text-white font-medium shadow-sm`}>
+                  <span>{getInitials(selectedUser.username)}</span>
+                </div>
+                <span className={`absolute bottom-0 right-0 ${selectedUser.online ? "bg-green-500" : "bg-zinc-500"} h-2.5 w-2.5 rounded-full border-2 border-[#1e1e1e]`}></span>
               </div>
-              <span className={`absolute bottom-0 right-0 ${selectedUser.online ? "bg-green-500" : "bg-zinc-500"} h-2.5 w-2.5 rounded-full border-2 border-[#1e1e1e]`}></span>
-            </div>
-            <div>
-              <h2 className="font-medium text-foreground">{selectedUser.username}</h2>
-              <div className="text-xs flex items-center">
-                {selectedUser.online ? (
-                  <>
-                    <span className="text-green-500">Active now</span>
-                    {isUserTyping(selectedUser.id) && (
-                      <span className="ml-2 text-zinc-400">• typing...</span>
-                    )}
-                  </>
-                ) : (
-                  <span className="text-zinc-400">Offline</span>
-                )}
+              <div>
+                <h2 className="font-medium text-foreground">{selectedUser.username}</h2>
+                <div className="text-xs flex items-center">
+                  {selectedUser.online ? (
+                    <>
+                      <span className="text-green-500">Active now</span>
+                      {isUserTyping(selectedUser.id) && (
+                        <span className="ml-2 text-zinc-400">• typing...</span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-zinc-400">Offline</span>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-          
-          {/* Header Actions */}
-          <div className="flex space-x-1">
-            <button className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-400 hover:bg-zinc-800 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-              </svg>
-            </button>
-            <button className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-400 hover:bg-zinc-800 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-              </svg>
-            </button>
-            <button className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-400 hover:bg-zinc-800 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
-              </svg>
-            </button>
+            
+            {/* Header Actions */}
+            <div className="flex space-x-1">
+              <button className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-400 hover:bg-zinc-800 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                </svg>
+              </button>
+              <button className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-400 hover:bg-zinc-800 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+              </button>
+              <button className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-400 hover:bg-zinc-800 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       )}
       
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 md:px-8" ref={scrollAreaRef}>
+      <div className="flex-1 overflow-y-auto p-4 md:px-8 lg:max-w-4xl lg:mx-auto" ref={scrollAreaRef}>
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="animate-spin h-6 w-6 text-messenger-yellow" />
