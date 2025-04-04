@@ -163,9 +163,9 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
           imagePath: data.imagePath
         });
         
-        // Create optimistic image message for local caching
+        // Create optimistic image message for local caching and UI update
         if (currentUser) {
-          // Buat optimistic message untuk cache lokal
+          // Buat optimistic message untuk cache lokal dan UI
           const tempId = Date.now();
           const imageMessage: MessageWithUser = {
             id: tempId,
@@ -180,8 +180,13 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
             isCurrentUser: true
           };
           
-          // Tambahkan ke cache lokal
+          // Tambahkan ke cache lokal dan update UI
           addMessageToCache(currentUser.id, selectedUser.id, imageMessage);
+          
+          // Add to React Query cache for immediate UI update
+          const queryKey = ["/api/messages", selectedUser.id];
+          const existingMessages = queryClient.getQueryData<MessageWithUser[]>(queryKey) || [];
+          queryClient.setQueryData(queryKey, [...existingMessages, imageMessage]);
         }
         
         // Clear image preview after upload
@@ -195,9 +200,9 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
           throw new Error("Socket.IO connection not open");
         }
         
-        // Create optimistic message for local caching
+        // Create optimistic message for immediate UI update
         if (currentUser) {
-          // Optimistic message untuk ditambahkan ke cache
+          // Create an optimistic message 
           const tempId = Date.now(); // Temporary ID sampai server mengirim ID sebenarnya
           const optimisticMessage: MessageWithUser = {
             id: tempId,
@@ -212,22 +217,29 @@ export default function MessageInput({ selectedUser }: MessageInputProps) {
             isCurrentUser: true
           };
           
-          // Tambahkan ke cache lokal
+          // Add to local cache
           addMessageToCache(currentUser.id, selectedUser.id, optimisticMessage);
-        }
-        
-        // Kirim pesan melalui socket
-        sendMessage(selectedUser.id, messageText);
-        setMessageText("");
-        
-        // Reset textarea height
-        if (textareaRef.current) {
-          textareaRef.current.style.height = "36px";
+          
+          // Add to React Query cache for immediate UI update
+          const queryKey = ["/api/messages", selectedUser.id];
+          const existingMessages = queryClient.getQueryData<MessageWithUser[]>(queryKey) || [];
+          queryClient.setQueryData(queryKey, [...existingMessages, optimisticMessage]);
+          
+          // Save message text before clearing input
+          const messageContent = messageText;
+          
+          // Clear input field immediately for better UX
+          setMessageText("");
+          
+          // Reset textarea height
+          if (textareaRef.current) {
+            textareaRef.current.style.height = "40px";
+          }
+          
+          // Send message via socket
+          sendMessage(selectedUser.id, messageContent);
         }
       }
-      
-      // Invalidate messages query to update UI
-      queryClient.invalidateQueries({ queryKey: ["/api/messages", selectedUser.id] });
     } catch (error) {
       console.error("Error sending message:", error);
       toast({

@@ -138,14 +138,15 @@ export function sendMessage(receiverId: number, content: string) {
     content
   });
 
-  // Optimistically update the UI immediately with the sent message
+  // Log confirmation when message is sent (for debugging and confirmation)
   socket.once("message_sent", (message) => {
+    console.log("Message sent confirmation:", message);
+    
     // When a message is sent, update the messages query
     const queryKey = ["/api/messages", receiverId];
     
-    // Optimistically update cache with the new message
-    const existingMessages = queryClient.getQueryData<any[]>(queryKey) || [];
-    queryClient.setQueryData(queryKey, [...existingMessages, message]);
+    // Invalidate the query to force a refetch with the new message
+    queryClient.invalidateQueries({ queryKey });
   });
 }
 
@@ -159,14 +160,15 @@ export function sendImageMessage(receiverId: number, imagePath: string) {
     imagePath
   });
 
-  // Optimistically update the UI immediately with the sent image message
+  // Log confirmation and invalidate the query to refresh data
   socket.once("image_message_sent", (data) => {
+    console.log("Image message sent confirmation:", data.message);
+    
     // When a message is sent, update the messages query
     const queryKey = ["/api/messages", receiverId];
     
-    // Optimistically update cache with the new message
-    const existingMessages = queryClient.getQueryData<any[]>(queryKey) || [];
-    queryClient.setQueryData(queryKey, [...existingMessages, data.message]);
+    // Invalidate the query to force a refetch with the new message
+    queryClient.invalidateQueries({ queryKey });
   });
 }
 
