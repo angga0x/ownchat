@@ -475,10 +475,18 @@ function updateMessageDeletedForAll(messageId: number) {
 
 // Function to delete a message for the current user only
 export function deleteMessageForMe(messageId: number) {
+  // Get the JWT token from localStorage
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    throw new Error("You must be logged in to delete messages");
+  }
+  
   return fetch(`/api/messages/${messageId}/for-me`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
     }
   }).then(res => {
     if (!res.ok) {
@@ -490,10 +498,18 @@ export function deleteMessageForMe(messageId: number) {
 
 // Function to delete a message for all users
 export function deleteMessageForAll(messageId: number) {
+  // Get the JWT token from localStorage
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    throw new Error("You must be logged in to delete messages");
+  }
+  
   return fetch(`/api/messages/${messageId}/for-all`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
     }
   }).then(res => {
     if (!res.ok) {
@@ -505,10 +521,18 @@ export function deleteMessageForAll(messageId: number) {
 
 // Functions for chat management
 export function pinChat(partnerId: number) {
+  // Get the JWT token from localStorage
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    throw new Error("You must be logged in to pin chats");
+  }
+  
   return fetch(`/api/chats/${partnerId}/pin`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
     }
   }).then(res => {
     if (!res.ok) {
@@ -519,10 +543,18 @@ export function pinChat(partnerId: number) {
 }
 
 export function unpinChat(partnerId: number) {
+  // Get the JWT token from localStorage
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    throw new Error("You must be logged in to unpin chats");
+  }
+  
   return fetch(`/api/chats/${partnerId}/unpin`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
     }
   }).then(res => {
     if (!res.ok) {
@@ -533,10 +565,18 @@ export function unpinChat(partnerId: number) {
 }
 
 export function archiveChat(partnerId: number) {
+  // Get the JWT token from localStorage
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    throw new Error("You must be logged in to archive chats");
+  }
+  
   return fetch(`/api/chats/${partnerId}/archive`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
     }
   }).then(res => {
     if (!res.ok) {
@@ -547,10 +587,18 @@ export function archiveChat(partnerId: number) {
 }
 
 export function unarchiveChat(partnerId: number) {
+  // Get the JWT token from localStorage
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    throw new Error("You must be logged in to unarchive chats");
+  }
+  
   return fetch(`/api/chats/${partnerId}/unarchive`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
     }
   }).then(res => {
     if (!res.ok) {
