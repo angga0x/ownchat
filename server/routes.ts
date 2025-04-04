@@ -1,8 +1,8 @@
-import type { Express } from "express";
+import express, { Express, Response, Request, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { WebSocketServer, WebSocket } from "ws";
+import { Server as SocketIOServer } from "socket.io";
 import { insertMessageSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
@@ -11,7 +11,7 @@ import { verifySocketToken } from "./auth";
 
 // Set up file storage for multer
 const storage_config = multer.diskStorage({
-  destination: (_req, _file, cb) => {
+  destination: (_req: Express.Request, _file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
     const uploadDir = path.join(process.cwd(), 'server', 'uploads');
     // Ensure uploads directory exists
     if (!fs.existsSync(uploadDir)) {
@@ -19,7 +19,7 @@ const storage_config = multer.diskStorage({
     }
     cb(null, uploadDir);
   },
-  filename: (_req, file, cb) => {
+  filename: (_req: Express.Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
     cb(null, file.fieldname + '-' + uniqueSuffix + ext);
@@ -29,7 +29,7 @@ const storage_config = multer.diskStorage({
 const upload = multer({ 
   storage: storage_config,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (_req, file, cb) => {
+  fileFilter: (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
     const allowedTypes = /jpeg|jpg|png|gif/;
     const mimetype = allowedTypes.test(file.mimetype);
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -48,132 +48,195 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create HTTP server
   const httpServer = createServer(app);
   
-  // Create WebSocket server
-  const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
+  // Create Socket.IO server
+  const io = new SocketIOServer(httpServer, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+    }
+  });
   
   // Socket connection user mapping
-  const userSockets = new Map<number, WebSocket>();
+  const userSockets = new Map<number, string>(); // userId -> socketId
   
-  // WebSocket connection handler
-  wss.on("connection", (ws, req) => {
+  // Socket.IO connection handler
+  io.on("connection", (socket) => {
+    console.log(`New socket connection: ${socket.id}`);
     let userId: number | undefined;
     
-    ws.on("message", async (message) => {
+    // Handle authentication
+    socket.on("auth", async (data) => {
       try {
-        const data = JSON.parse(message.toString());
-        
-        // Handle authentication
-        if (data.type === "auth") {
-          const user = verifySocketToken(data.token);
-          if (!user) {
-            ws.send(JSON.stringify({ type: "error", message: "Invalid authentication" }));
-            ws.close();
-            return;
-          }
-          
-          userId = user.id;
-          userSockets.set(userId, ws);
-          
-          // Set user online
-          await storage.setUserOnlineStatus(userId, true);
-          
-          // Broadcast user online status to all connected clients
-          broadcastUserStatus(userId, true);
-          
-          // Send confirmation
-          ws.send(JSON.stringify({ type: "auth_success", userId }));
+        const user = verifySocketToken(data.token);
+        if (!user) {
+          socket.emit("error", { message: "Invalid authentication" });
+          socket.disconnect();
           return;
         }
         
-        // Ensure user is authenticated for other message types
-        if (!userId) {
-          ws.send(JSON.stringify({ type: "error", message: "Not authenticated" }));
-          return;
-        }
+        userId = user.id;
+        userSockets.set(userId, socket.id);
         
-        // Handle private messages
-        if (data.type === "private_message") {
-          // Validate message
-          const { receiverId, content } = data;
-          
-          // Store message in database
-          const newMessage = await storage.createMessage({
-            senderId: userId,
-            receiverId,
-            content,
-            imagePath: null,
-            timestamp: new Date()
-          });
-          
-          // Get sender data for response
-          const sender = await storage.getUser(userId);
-          
-          if (!sender) {
-            ws.send(JSON.stringify({ type: "error", message: "Sender not found" }));
-            return;
-          }
-          
-          // Prepare message response
-          const messageResponse = {
-            id: newMessage.id,
-            senderId: newMessage.senderId,
-            senderUsername: sender.username,
-            receiverId: newMessage.receiverId,
-            content: newMessage.content,
-            imagePath: newMessage.imagePath,
-            timestamp: newMessage.timestamp
-          };
-          
-          // Send to recipient if online
-          const recipientSocket = userSockets.get(receiverId);
-          if (recipientSocket && recipientSocket.readyState === WebSocket.OPEN) {
-            recipientSocket.send(JSON.stringify({
-              type: "private_message",
-              message: messageResponse
-            }));
-          }
-          
-          // Send confirmation back to sender
-          ws.send(JSON.stringify({
-            type: "message_sent",
-            message: messageResponse
-          }));
-        }
+        // Set user online
+        await storage.setUserOnlineStatus(userId, true);
+        
+        // Broadcast user online status to all connected clients
+        io.emit("user_status", { userId, online: true });
+        
+        // Send confirmation
+        socket.emit("auth_success", { userId });
+        
+        console.log(`User ${userId} (${user.username}) authenticated`);
       } catch (error) {
-        console.error("WebSocket message error:", error);
-        ws.send(JSON.stringify({ type: "error", message: "Invalid message format" }));
+        console.error("Socket authentication error:", error);
+        socket.emit("error", { message: "Authentication error" });
+      }
+    });
+    
+    // Handle private messages
+    socket.on("private_message", async (data) => {
+      try {
+        // Ensure user is authenticated
+        if (!userId) {
+          socket.emit("error", { message: "Not authenticated" });
+          return;
+        }
+        
+        const { receiverId, content } = data;
+        
+        // Store message in database
+        const newMessage = await storage.createMessage({
+          senderId: userId,
+          receiverId,
+          content,
+          imagePath: null,
+          timestamp: new Date()
+        });
+        
+        // Get sender data for response
+        const sender = await storage.getUser(userId);
+        
+        if (!sender) {
+          socket.emit("error", { message: "Sender not found" });
+          return;
+        }
+        
+        // Prepare message response
+        const messageResponse = {
+          id: newMessage.id,
+          senderId: newMessage.senderId,
+          senderUsername: sender.username,
+          receiverId: newMessage.receiverId,
+          content: newMessage.content,
+          imagePath: newMessage.imagePath,
+          timestamp: newMessage.timestamp,
+          isCurrentUser: false
+        };
+        
+        // Send to recipient if online
+        const recipientSocketId = userSockets.get(receiverId);
+        if (recipientSocketId) {
+          const recipientSocket = io.sockets.sockets.get(recipientSocketId);
+          if (recipientSocket) {
+            recipientSocket.emit("private_message", {
+              ...messageResponse,
+              isCurrentUser: false
+            });
+          }
+        }
+        
+        // Send confirmation back to sender
+        socket.emit("message_sent", {
+          ...messageResponse,
+          isCurrentUser: true
+        });
+        
+      } catch (error) {
+        console.error("Private message error:", error);
+        socket.emit("error", { message: "Error sending message" });
+      }
+    });
+    
+    // Handle image messages
+    socket.on("image_message", async (data) => {
+      try {
+        // Ensure user is authenticated
+        if (!userId) {
+          socket.emit("error", { message: "Not authenticated" });
+          return;
+        }
+        
+        const { receiverId, imagePath } = data;
+        
+        // Store message in database
+        const newMessage = await storage.createMessage({
+          senderId: userId,
+          receiverId,
+          content: null,
+          imagePath,
+          timestamp: new Date()
+        });
+        
+        // Get sender data for response
+        const sender = await storage.getUser(userId);
+        
+        if (!sender) {
+          socket.emit("error", { message: "Sender not found" });
+          return;
+        }
+        
+        // Prepare message response
+        const messageResponse = {
+          id: newMessage.id,
+          senderId: newMessage.senderId,
+          senderUsername: sender.username,
+          receiverId: newMessage.receiverId,
+          content: newMessage.content,
+          imagePath: newMessage.imagePath,
+          timestamp: newMessage.timestamp,
+          isCurrentUser: false
+        };
+        
+        // Send to recipient if online
+        const recipientSocketId = userSockets.get(receiverId);
+        if (recipientSocketId) {
+          const recipientSocket = io.sockets.sockets.get(recipientSocketId);
+          if (recipientSocket) {
+            recipientSocket.emit("image_message", {
+              ...messageResponse,
+              isCurrentUser: false
+            });
+          }
+        }
+        
+        // Send confirmation back to sender
+        socket.emit("message_sent", {
+          ...messageResponse,
+          isCurrentUser: true
+        });
+        
+      } catch (error) {
+        console.error("Image message error:", error);
+        socket.emit("error", { message: "Error sending image message" });
       }
     });
     
     // Handle disconnection
-    ws.on("close", async () => {
+    socket.on("disconnect", async () => {
       if (userId) {
+        console.log(`User ${userId} disconnected`);
+        
         // Set user offline
         await storage.setUserOnlineStatus(userId, false);
         
         // Broadcast user offline status
-        broadcastUserStatus(userId, false);
+        io.emit("user_status", { userId, online: false });
         
         // Remove from socket map
         userSockets.delete(userId);
       }
     });
   });
-  
-  // Function to broadcast user status changes
-  function broadcastUserStatus(userId: number, isOnline: boolean) {
-    const statusUpdate = JSON.stringify({
-      type: "user_status",
-      userId,
-      online: isOnline
-    });
-    
-    for (const [_, socket] of userSockets.entries()) {
-      if (socket.readyState === WebSocket.OPEN) {
-        socket.send(statusUpdate);
-      }
-    }
-  }
   
   // API routes
   
@@ -209,7 +272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Upload image
-  app.post("/api/upload", [authenticateJWT, upload.single("image")], async (req: any, res) => {
+  app.post("/api/upload", [authenticateJWT, upload.single("image")], async (req: any, res: Response) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No image file provided" });
@@ -226,7 +289,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Send image message
-  app.post("/api/messages/image", authenticateJWT, async (req: any, res) => {
+  app.post("/api/messages/image", authenticateJWT, async (req: any, res: Response) => {
     try {
       const { receiverId, imagePath } = req.body;
       
@@ -254,19 +317,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         receiverId: newMessage.receiverId,
         content: newMessage.content,
         imagePath: newMessage.imagePath,
-        timestamp: newMessage.timestamp
+        timestamp: newMessage.timestamp,
+        isCurrentUser: false
       };
       
       // Send to recipient if online
-      const recipientSocket = userSockets.get(parseInt(receiverId));
-      if (recipientSocket && recipientSocket.readyState === WebSocket.OPEN) {
-        recipientSocket.send(JSON.stringify({
-          type: "image_message",
-          message: messageResponse
-        }));
+      const recipientSocketId = userSockets.get(parseInt(receiverId));
+      if (recipientSocketId) {
+        const recipientSocket = io.sockets.sockets.get(recipientSocketId);
+        if (recipientSocket) {
+          recipientSocket.emit("image_message", messageResponse);
+        }
       }
       
-      res.json(messageResponse);
+      // Add isCurrentUser flag for the sender's response
+      res.json({
+        ...messageResponse,
+        isCurrentUser: true
+      });
     } catch (error) {
       console.error("Send image message error:", error);
       res.status(500).json({ message: "Server error sending image message" });

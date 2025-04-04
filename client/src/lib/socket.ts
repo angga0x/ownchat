@@ -1,78 +1,79 @@
 import { queryClient } from "./queryClient";
+import { io, Socket } from "socket.io-client";
 
-let socket: WebSocket | null = null;
+let socket: Socket | null = null;
 
 export function setupSocket(token: string) {
   // Close existing socket if any
-  if (socket && socket.readyState === WebSocket.OPEN) {
-    socket.close();
+  if (socket) {
+    socket.disconnect();
   }
   
-  // Create new WebSocket connection
-  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  const wsUrl = `${protocol}//${window.location.host}/ws`;
-  socket = new WebSocket(wsUrl);
+  // Create new Socket.IO connection
+  socket = io({
+    autoConnect: true,
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+  });
   
-  socket.onopen = () => {
-    console.log("WebSocket connection established");
+  // Connection events
+  socket.on("connect", () => {
+    console.log("Socket.IO connection established");
     
     // Authenticate the connection with JWT
-    if (socket) {
-      socket.send(JSON.stringify({
-        type: "auth",
-        token
-      }));
-    }
-  };
+    socket?.emit("auth", { token });
+  });
   
-  socket.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      
-      console.log("WebSocket message received:", data);
-      
-      switch (data.type) {
-        case "auth_success":
-          console.log("WebSocket authentication successful");
-          break;
-        
-        case "private_message":
-        case "image_message":
-          // Handle incoming message
-          handleIncomingMessage(data.message);
-          break;
-        
-        case "user_status":
-          // Handle user status change
-          handleUserStatusChange(data.userId, data.online);
-          break;
-        
-        case "error":
-          console.error("WebSocket error:", data.message);
-          break;
-          
-        default:
-          console.log("Unknown message type:", data.type);
-      }
-    } catch (error) {
-      console.error("Error parsing WebSocket message:", error);
-    }
-  };
+  // Set up event handlers
+  socket.on("auth_success", (data) => {
+    console.log("Socket.IO authentication successful", data);
+  });
   
-  socket.onerror = (error) => {
-    console.error("WebSocket error:", error);
-  };
+  socket.on("private_message", (data) => {
+    console.log("Private message received:", data);
+    handleIncomingMessage(data);
+  });
   
-  socket.onclose = () => {
-    console.log("WebSocket connection closed");
-  };
+  socket.on("image_message", (data) => {
+    console.log("Image message received:", data);
+    handleIncomingMessage(data.message);
+  });
+  
+  socket.on("message_sent", (data) => {
+    console.log("Message sent confirmation:", data);
+    // This will be handled by the sender's UI
+  });
+  
+  socket.on("user_status", (data) => {
+    console.log("User status change:", data);
+    handleUserStatusChange(data.userId, data.online);
+  });
+  
+  socket.on("error", (data) => {
+    console.error("Socket.IO error:", data.message);
+  });
+  
+  socket.on("disconnect", () => {
+    console.log("Socket.IO disconnected");
+  });
+  
+  socket.on("reconnect", (attemptNumber) => {
+    console.log(`Socket.IO reconnected after ${attemptNumber} attempts`);
+    // Reauthenticate after reconnection
+    socket?.emit("auth", { token });
+  });
+  
+  socket.on("reconnect_error", (error) => {
+    console.error("Socket.IO reconnection error:", error);
+  });
   
   return socket;
 }
 
 export function disconnectSocket() {
   if (socket) {
-    socket.close();
+    socket.disconnect();
     socket = null;
   }
 }
@@ -82,15 +83,25 @@ export function getSocket() {
 }
 
 export function sendMessage(receiverId: number, content: string) {
-  if (!socket || socket.readyState !== WebSocket.OPEN) {
-    throw new Error("WebSocket connection not open");
+  if (!socket || !socket.connected) {
+    throw new Error("Socket.IO connection not open");
   }
   
-  socket.send(JSON.stringify({
-    type: "private_message",
+  socket.emit("private_message", {
     receiverId,
     content
-  }));
+  });
+}
+
+export function sendImageMessage(receiverId: number, imagePath: string) {
+  if (!socket || !socket.connected) {
+    throw new Error("Socket.IO connection not open");
+  }
+  
+  socket.emit("image_message", {
+    receiverId,
+    imagePath
+  });
 }
 
 function handleIncomingMessage(message: any) {
@@ -98,7 +109,7 @@ function handleIncomingMessage(message: any) {
   const queryKey = ["/api/messages", message.senderId];
   
   // Optimistically update cache
-  const existingMessages = queryClient.getQueryData(queryKey) || [];
+  const existingMessages = queryClient.getQueryData<any[]>(queryKey) || [];
   queryClient.setQueryData(queryKey, [...existingMessages, message]);
   
   // Also invalidate to ensure we have the latest data
