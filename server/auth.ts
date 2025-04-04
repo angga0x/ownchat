@@ -104,7 +104,7 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", { session: false }, async (err, user) => {
+    passport.authenticate("local", { session: false }, async (err: Error | null, user: SelectUser | false) => {
       if (err) return next(err);
       if (!user) {
         return res.status(401).json({ message: "Invalid username or PIN" });
