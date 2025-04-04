@@ -29,21 +29,40 @@ export function setupSocket(token: string) {
   // Set up event handlers
   socket.on("auth_success", (data) => {
     console.log("Socket.IO authentication successful", data);
+    
+    // Mark messages as delivered when user comes online
+    socket?.emit("mark_delivered");
   });
   
   socket.on("private_message", (data) => {
     console.log("Private message received:", data);
     handleIncomingMessage(data);
+    
+    // Mark the message as delivered immediately
+    socket?.emit("message_delivered", { messageId: data.id, senderId: data.senderId });
   });
   
   socket.on("image_message", (data) => {
     console.log("Image message received:", data);
     handleIncomingMessage(data.message);
+    
+    // Mark the message as delivered immediately
+    socket?.emit("message_delivered", { messageId: data.message.id, senderId: data.message.senderId });
   });
   
   socket.on("message_sent", (data) => {
     console.log("Message sent confirmation:", data);
     // This will be handled by the sender's UI
+  });
+  
+  socket.on("message_delivered", (data) => {
+    console.log("Message delivery status updated:", data);
+    updateMessageDeliveryStatus(data.messageId, 'delivered');
+  });
+  
+  socket.on("message_read", (data) => {
+    console.log("Message read status updated:", data);
+    updateMessageDeliveryStatus(data.messageId, 'read');
   });
   
   socket.on("user_status", (data) => {
@@ -130,4 +149,42 @@ function handleUserStatusChange(userId: number, online: boolean) {
     
     queryClient.setQueryData(usersKey, updatedUsers);
   }
+}
+
+// Function to update message delivery or read status
+function updateMessageDeliveryStatus(messageId: number, status: 'delivered' | 'read') {
+  // We need to search through all active conversations for this message
+  const allQueryKeys = queryClient.getQueryCache().getAll();
+  
+  allQueryKeys.forEach(query => {
+    const queryKey = query.queryKey;
+    if (Array.isArray(queryKey) && queryKey[0] === '/api/messages') {
+      const messages = queryClient.getQueryData<any[]>(queryKey);
+      
+      if (messages) {
+        const updatedMessages = messages.map(msg => {
+          if (msg.id === messageId) {
+            if (status === 'delivered') {
+              return { ...msg, delivered: true };
+            } else if (status === 'read') {
+              return { ...msg, delivered: true, read: true };
+            }
+          }
+          return msg;
+        });
+        
+        queryClient.setQueryData(queryKey, updatedMessages);
+      }
+    }
+  });
+}
+
+// Function to mark messages as read when a user views them
+export function markMessagesAsRead(senderId: number) {
+  if (!socket || !socket.connected) {
+    console.warn("Socket.IO connection not open, can't mark messages as read");
+    return;
+  }
+  
+  socket.emit("mark_read", { senderId });
 }

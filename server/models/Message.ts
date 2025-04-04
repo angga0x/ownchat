@@ -29,6 +29,14 @@ const messageSchema = new Schema<Message>({
   timestamp: { 
     type: Date, 
     default: Date.now 
+  },
+  delivered: {
+    type: Boolean,
+    default: false
+  },
+  read: {
+    type: Boolean,
+    default: false
   }
 });
 

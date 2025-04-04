@@ -16,6 +16,8 @@ export const messages = pgTable("messages", {
   content: text("content"),
   imagePath: text("image_path"),
   timestamp: timestamp("timestamp").defaultNow().notNull(),
+  delivered: boolean("delivered").default(false),
+  read: boolean("read").default(false),
 });
 
 // User schemas
@@ -39,6 +41,8 @@ export const registerSchema = loginSchema.extend({
 // Message schema
 export const insertMessageSchema = createInsertSchema(messages).omit({
   id: true,
+  delivered: true,
+  read: true,
 });
 
 export const messageWithUser = z.object({
@@ -48,6 +52,8 @@ export const messageWithUser = z.object({
   content: z.string().nullable(),
   imagePath: z.string().nullable(),
   timestamp: z.date(),
+  delivered: z.boolean().default(false),
+  read: z.boolean().default(false),
   senderUsername: z.string(),
   isCurrentUser: z.boolean(),
 });

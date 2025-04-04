@@ -7,6 +7,7 @@ import MessageInput from "./message-input";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { markMessagesAsRead } from "@/lib/socket";
 
 interface ChatRoomProps {
   selectedUser: User | null;
@@ -52,6 +53,14 @@ export default function ChatRoom({ selectedUser, currentUser, getInitials }: Cha
       }, 100);
     }
   }, [messages, selectedUser]);
+  
+  // Mark messages as read when user selects a conversation
+  useEffect(() => {
+    if (selectedUser && currentUser) {
+      // Mark all messages from the selected user as read
+      markMessagesAsRead(selectedUser.id);
+    }
+  }, [selectedUser, currentUser, messages]);
   
   // Function to determine background color based on username
   const getUserColor = (username: string) => {

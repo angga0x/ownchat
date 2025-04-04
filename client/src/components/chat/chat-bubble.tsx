@@ -24,7 +24,26 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
             }`}>
             <p className="text-sm break-words whitespace-pre-wrap">{message.content}</p>
           </div>
-          <span className="text-[10px] text-gray-500 leading-none px-1">{formattedTime}</span>
+          <div className="flex items-center px-1 space-x-1">
+            <span className="text-[10px] text-gray-500 leading-none">{formattedTime}</span>
+            {isCurrentUser && (
+              <span className="text-[10px] text-gray-500 leading-none flex items-center">
+                {message.read ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.707 14.707a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L9 12.586l7.293-7.293a1 1 0 011.414 1.414l-8 8z" />
+                  </svg>
+                ) : message.delivered ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.707 14.707a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L9 12.586l7.293-7.293a1 1 0 011.414 1.414l-8 8z" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -72,7 +91,26 @@ export default function ChatBubble({ message, isCurrentUser }: ChatBubbleProps) 
               </div>
             )}
           </div>
-          <span className="text-[10px] text-gray-500 leading-none px-1">{formattedTime}</span>
+          <div className="flex items-center px-1 space-x-1">
+            <span className="text-[10px] text-gray-500 leading-none">{formattedTime}</span>
+            {isCurrentUser && (
+              <span className="text-[10px] text-gray-500 leading-none flex items-center">
+                {message.read ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.707 14.707a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L9 12.586l7.293-7.293a1 1 0 011.414 1.414l-8 8z" />
+                  </svg>
+                ) : message.delivered ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.707 14.707a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L9 12.586l7.293-7.293a1 1 0 011.414 1.414l-8 8z" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     );

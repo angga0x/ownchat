@@ -222,6 +222,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
     
+    // Handle marking messages as delivered
+    socket.on("mark_delivered", async () => {
+      try {
+        if (!userId) {
+          socket.emit("error", { message: "Not authenticated" });
+          return;
+        }
+        
+        // Mark all undelivered messages to this user as delivered
+        const count = await storage.markMessagesAsDelivered(userId);
+        
+        if (count > 0) {
+          console.log(`Marked ${count} messages as delivered for user ${userId}`);
+          
+          // Get undelivered messages to know which senders to notify
+          const undeliveredMessages = await storage.getUndeliveredMessages(userId);
+          
+          // Group by sender and notify each sender their messages were delivered
+          const senderIds = [...new Set(undeliveredMessages.map(msg => msg.senderId))];
+          
+          for (const senderId of senderIds) {
+            const senderSocketId = userSockets.get(senderId);
+            if (senderSocketId) {
+              const senderSocket = io.sockets.sockets.get(senderSocketId);
+              if (senderSocket) {
+                // Find messages from this sender
+                const messages = undeliveredMessages.filter(msg => msg.senderId === senderId);
+                
+                // Notify for each message
+                for (const message of messages) {
+                  senderSocket.emit("message_delivered", { 
+                    messageId: message.id,
+                    receiverId: userId
+                  });
+                }
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Mark delivered error:", error);
+      }
+    });
+    
+    // Handle marking messages as read
+    socket.on("mark_read", async (data) => {
+      try {
+        if (!userId) {
+          socket.emit("error", { message: "Not authenticated" });
+          return;
+        }
+        
+        const { senderId } = data;
+        
+        // Mark messages from the specified sender as read
+        const count = await storage.markMessagesAsRead(senderId, userId);
+        
+        if (count > 0) {
+          console.log(`Marked ${count} messages from ${senderId} as read for user ${userId}`);
+          
+          // Notify the sender their messages were read
+          const senderSocketId = userSockets.get(senderId);
+          if (senderSocketId) {
+            const senderSocket = io.sockets.sockets.get(senderSocketId);
+            if (senderSocket) {
+              // Get all messages that were marked as read
+              const messages = await storage.getMessages(senderId, userId);
+              const readMessages = messages.filter(msg => 
+                msg.senderId === senderId && 
+                msg.receiverId === userId && 
+                msg.read
+              );
+              
+              // Notify for each message
+              for (const message of readMessages) {
+                senderSocket.emit("message_read", { 
+                  messageId: message.id,
+                  receiverId: userId
+                });
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Mark read error:", error);
+      }
+    });
+    
+    // Handle individual message delivered notification
+    socket.on("message_delivered", async (data) => {
+      try {
+        if (!userId) {
+          socket.emit("error", { message: "Not authenticated" });
+          return;
+        }
+        
+        const { messageId, senderId } = data;
+        
+        // Find the sender socket
+        const senderSocketId = userSockets.get(senderId);
+        if (senderSocketId) {
+          const senderSocket = io.sockets.sockets.get(senderSocketId);
+          if (senderSocket) {
+            // Notify sender that message was delivered
+            senderSocket.emit("message_delivered", { 
+              messageId,
+              receiverId: userId
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Message delivered notification error:", error);
+      }
+    });
+    
     // Handle disconnection
     socket.on("disconnect", async () => {
       if (userId) {

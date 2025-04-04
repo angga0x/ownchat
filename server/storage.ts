@@ -20,6 +20,9 @@ export interface IStorage {
   // Message methods
   getMessages(senderId: number, receiverId: number): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
+  markMessagesAsDelivered(receiverId: number): Promise<number>;
+  markMessagesAsRead(senderId: number, receiverId: number): Promise<number>;
+  getUndeliveredMessages(receiverId: number): Promise<Message[]>;
   
   // Session store
   sessionStore: any; // Using any type to avoid session.SessionStore issue
@@ -127,7 +130,9 @@ export class MongoStorage implements IStorage {
       const newMessage = new MessageModel({
         ...insertMessage,
         id: newId,
-        timestamp: insertMessage.timestamp || new Date()
+        timestamp: insertMessage.timestamp || new Date(),
+        delivered: false,
+        read: false
       });
       
       await newMessage.save();
@@ -135,6 +140,59 @@ export class MongoStorage implements IStorage {
     } catch (error) {
       log(`Error creating message: ${error}`, 'mongodb');
       throw error;
+    }
+  }
+  
+  async markMessagesAsDelivered(receiverId: number): Promise<number> {
+    try {
+      const result = await MessageModel.updateMany(
+        { 
+          receiverId, 
+          delivered: false 
+        },
+        { 
+          delivered: true 
+        }
+      );
+      
+      return result.modifiedCount;
+    } catch (error) {
+      log(`Error marking messages as delivered: ${error}`, 'mongodb');
+      return 0;
+    }
+  }
+  
+  async markMessagesAsRead(senderId: number, receiverId: number): Promise<number> {
+    try {
+      const result = await MessageModel.updateMany(
+        { 
+          senderId, 
+          receiverId, 
+          read: false 
+        },
+        { 
+          read: true 
+        }
+      );
+      
+      return result.modifiedCount;
+    } catch (error) {
+      log(`Error marking messages as read: ${error}`, 'mongodb');
+      return 0;
+    }
+  }
+  
+  async getUndeliveredMessages(receiverId: number): Promise<Message[]> {
+    try {
+      const messages = await MessageModel.find({
+        receiverId,
+        delivered: false
+      }).sort({ timestamp: 1 });
+      
+      return messages.map(msg => msg.toObject());
+    } catch (error) {
+      log(`Error fetching undelivered messages: ${error}`, 'mongodb');
+      return [];
     }
   }
 }
@@ -211,10 +269,46 @@ export class MemStorage implements IStorage {
       receiverId: insertMessage.receiverId,
       content: insertMessage.content || null,
       imagePath: insertMessage.imagePath || null,
-      timestamp: insertMessage.timestamp || new Date() 
+      timestamp: insertMessage.timestamp || new Date(),
+      delivered: false,
+      read: false
     };
     this.messages.set(id, message);
     return message;
+  }
+  
+  async markMessagesAsDelivered(receiverId: number): Promise<number> {
+    let count = 0;
+    const messages = Array.from(this.messages.values());
+    
+    for (const message of messages) {
+      if (message.receiverId === receiverId && !message.delivered) {
+        message.delivered = true;
+        this.messages.set(message.id, message);
+        count++;
+      }
+    }
+    return count;
+  }
+  
+  async markMessagesAsRead(senderId: number, receiverId: number): Promise<number> {
+    let count = 0;
+    const messages = Array.from(this.messages.values());
+    
+    for (const message of messages) {
+      if (message.senderId === senderId && message.receiverId === receiverId && !message.read) {
+        message.read = true;
+        this.messages.set(message.id, message);
+        count++;
+      }
+    }
+    return count;
+  }
+  
+  async getUndeliveredMessages(receiverId: number): Promise<Message[]> {
+    return Array.from(this.messages.values())
+      .filter(msg => msg.receiverId === receiverId && !msg.delivered)
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
   }
 }
 
